@@ -60,6 +60,32 @@ Por derechos de autor, el repositorio **no** incluye imágenes:
 - **Wallpapers**: la estética está pensada para pinturas (por ejemplo *La Libertad guiando al pueblo*,
   de Delacroix, de dominio público). Usá el selector de wallpapers de ML4W o `awww img <imagen>`.
 
+### Pintura al azar al iniciar (opcional)
+
+Al iniciar, ML4W restaura el último wallpaper guardado en su caché. Si otro script cambia el
+wallpaper al mismo tiempo, gana el que termina último (y los colores quedan calculados a partir
+de la imagen equivocada). Para que cada arranque muestre una pintura al azar **aplicada por ML4W**
+—con los colores de la interfaz generados a partir de esa pintura—, sin carreras ni `sleep`:
+
+1. `install.sh` instala `hypr/scripts/wallpaper-inicio.sh` y ajusta `ml4w/settings/wallpaper-folder`
+   a `$HOME/wallpapers`. Poné tus imágenes (`jpg`, `jpeg`, `png`) en la raíz de esa carpeta.
+2. En `~/.config/hypr/conf/autostart.conf`, reemplazá la línea
+
+   ```
+   exec-once = ~/.config/ml4w/scripts/ml4w-autostart
+   ```
+
+   por
+
+   ```
+   exec-once = bash -c "~/.config/hypr/scripts/wallpaper-inicio.sh; ~/.config/ml4w/scripts/ml4w-autostart"
+   ```
+
+   y quitá cualquier otro `exec-once` que cambie el wallpaper al iniciar.
+
+El script solo escribe la pintura elegida en la caché de ML4W; al ir encadenado, la caché ya está
+lista cuando `ml4w-autostart` la lee. Con `Super + Shift + W` se cambia a otra pintura al azar.
+
 ## Volver atrás
 
 Cada instalación genera su propio script de restauración, que devuelve los archivos originales
