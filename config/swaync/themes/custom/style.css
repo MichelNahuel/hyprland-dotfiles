@@ -1,0 +1,59 @@
+/* -----------------------------------------------------
+ * Custom: notificaciones con la estética de la barra superior
+ * (translúcidas, borde fino, esquinas rectas).
+ * El centro de control se mantiene igual que "glass".
+ * ----------------------------------------------------- */
+
+@import "../glass/notifications.css";
+@import "../glass/control_center.css";
+
+.floating-notifications.background .notification-row .notification-background .notification,
+.floating-notifications.background .notification-row .notification-background .notification.critical {
+    background: alpha(@surface_container_lowest, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0px;
+    box-shadow: none;
+}
+
+.floating-notifications.background .notification-row .notification-background .notification.critical {
+    border-color: alpha(@error, 0.6);
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  > *:last-child
+  > *
+  .notification-action {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid transparent;
+    border-radius: 0px;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  > *:last-child
+  > *
+  .notification-action:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .close-button {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 0px;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .close-button:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-radius: 0px;
+}

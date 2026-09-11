@@ -1,0 +1,45 @@
+/* -----------------------------------------------------
+ * Custom: barra plana pegada al borde superior
+ * launch.sh carga este archivo en lugar de style.css
+ * ----------------------------------------------------- */
+
+@import 'style.css';
+
+/* Íconos: glifos Material Design de JetBrainsMono Nerd Font (el texto sigue en Fira Sans) */
+* {
+    font-family: "Fira Sans Semibold", "JetBrainsMono Nerd Font Propo", "Font Awesome 7 Free", "Font Awesome 7 Brands", sans-serif;
+}
+
+#custom-notification {
+    font-family: "JetBrainsMono Nerd Font Propo";
+    font-size: 16px;
+}
+
+window#waybar {
+    background: alpha(@surface_container_lowest, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Altura de la barra: sin la altura mínima de botón del tema GTK */
+#workspaces {
+    padding: 4px 3px;
+}
+
+#workspaces button {
+    min-height: 0px;
+}
+
+#custom-fecha {
+    margin-left: 12px;
+    margin-right: 12px;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    margin: 0px;
+    padding: 2px 6px;
+    border-radius: 0px;
+    box-shadow: none;
+    opacity: 1;
+}

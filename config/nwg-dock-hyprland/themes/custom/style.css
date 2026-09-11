@@ -1,0 +1,48 @@
+/* -----------------------------------------------------
+ * Custom: misma estética que la barra superior
+ * (translúcida, borde fino, esquinas rectas, flotante)
+ * ----------------------------------------------------- */
+
+@import url("../../colors.css");
+
+window {
+    background: alpha(@surface_container_lowest, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0px;
+    opacity: 1;
+    margin: 10px;
+}
+
+#box {
+    padding: 6px;
+}
+
+#active {
+    /* Subrayado fino bajo la app de la ventana activa */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 0px;
+}
+
+button, image {
+    background: none;
+    border-style: none;
+    box-shadow: none;
+    color: @on_surface;
+}
+
+button {
+    padding: 4px;
+    margin-left: 4px;
+    margin-right: 4px;
+    font-size: 12px;
+    border-radius: 0px;
+}
+
+button:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+    border-radius: 0px;
+}
+
+button:focus {
+    box-shadow: none;
+}
