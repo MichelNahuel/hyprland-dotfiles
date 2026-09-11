@@ -1,0 +1,8 @@
+# -----------------------------------------------------
+# CUSTOMIZATION (propia)
+# Reemplaza a ~/.config/bashrc/20-customization: el cargador de ML4W
+# usa el archivo de custom/ cuando existe uno con el mismo nombre.
+# -----------------------------------------------------
+
+POSH=agnoster
+eval "$(oh-my-posh init bash --config $HOME/.config/ohmyposh/marco.toml)"

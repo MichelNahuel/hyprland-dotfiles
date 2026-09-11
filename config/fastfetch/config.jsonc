@@ -1,0 +1,74 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    // Bienvenida minimalista con el mismo marco fino que el prompt.
+    // {#30} = gris tenue (color0), {#keys} = color de las etiquetas (acento).
+    // N animada (se invierte de abajo hacia arriba). La genera
+    // ~/.config/fastfetch/logo-n.py y kitty la reproduce en bucle.
+    "logo": {
+        "type": "kitty-icat",
+        "source": "~/.cache/fastfetch/logo-n.png",
+        "width": 16,
+        "height": 10,
+        "padding": {
+            "top": 1,
+            "left": 2,
+            "right": 3
+        }
+    },
+    "display": {
+        "separator": " ",
+        "color": {
+            "keys": "blue",
+            "title": "blue"
+        }
+    },
+    "modules": [
+        {
+            "type": "title",
+            "key": "{#30}┌─{#keys}",
+            "format": "{user-name}@{host-name}"
+        },
+        {
+            "type": "os",
+            "key": "{#30}│{#keys} os     "
+        },
+        {
+            "type": "kernel",
+            "key": "{#30}│{#keys} kernel "
+        },
+        {
+            "type": "wm",
+            "key": "{#30}│{#keys} wm     "
+        },
+        {
+            "type": "terminal",
+            "key": "{#30}│{#keys} term   "
+        },
+        {
+            "type": "shell",
+            "key": "{#30}│{#keys} shell  "
+        },
+        {
+            "type": "uptime",
+            "key": "{#30}│{#keys} uptime "
+        },
+        {
+            "type": "cpu",
+            "key": "{#30}│{#keys} cpu    "
+        },
+        {
+            "type": "memory",
+            "key": "{#30}│{#keys} memory "
+        },
+        {
+            "type": "disk",
+            "key": "{#30}│{#keys} disk   ",
+            "folders": "/"
+        },
+        {
+            "type": "colors",
+            "key": "{#30}└─{#keys}",
+            "symbol": "circle"
+        }
+    ]
+}

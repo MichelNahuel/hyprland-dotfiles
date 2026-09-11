@@ -1,0 +1,80 @@
+# Prompt en dos líneas con marco fino.
+# Colores ANSI: siguen la paleta de matugen de kitty (black = gris tenue, blue = acento de la pintura).
+#
+#   ┌─ ~/hyprland-dotfiles ── main*
+#   └─› _
+
+console_title_template = '{{ .Shell }} in {{ .Folder }}'
+version = 3
+final_space = true
+
+[secondary_prompt]
+  template = '   › '
+  foreground = 'blue'
+  background = 'transparent'
+
+# Línea 1: marco + ruta + rama
+[[blocks]]
+  type = 'prompt'
+  alignment = 'left'
+  newline = true
+
+  [[blocks.segments]]
+    type = 'text'
+    style = 'plain'
+    template = '┌─ '
+    foreground = 'black'
+    background = 'transparent'
+
+  [[blocks.segments]]
+    type = 'path'
+    style = 'plain'
+    template = '{{ .Path }}'
+    foreground = 'blue'
+    background = 'transparent'
+
+    [blocks.segments.properties]
+      style = 'full'
+      cache_duration = 'none'
+
+  [[blocks.segments]]
+    type = 'git'
+    style = 'plain'
+    template = '<black> ── </>{{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end }}{{ if gt .Behind 0 }} ⇣{{ end }}{{ if gt .Ahead 0 }} ⇡{{ end }}'
+    foreground = 'white'
+    background = 'transparent'
+
+    [blocks.segments.properties]
+      branch_icon = ''
+      commit_icon = '@'
+      fetch_status = true
+      cache_duration = 'none'
+
+# Tiempo de ejecución a la derecha (solo si tardó más de 5 s)
+[[blocks]]
+  type = 'rprompt'
+  overflow = 'hidden'
+
+  [[blocks.segments]]
+    type = 'executiontime'
+    style = 'plain'
+    template = '{{ .FormattedMs }}'
+    foreground = 'yellow'
+    background = 'transparent'
+
+    [blocks.segments.properties]
+      threshold = 5000
+      cache_duration = 'none'
+
+# Línea 2: cierre del marco + flecha (roja si el último comando falló)
+[[blocks]]
+  type = 'prompt'
+  alignment = 'left'
+  newline = true
+
+  [[blocks.segments]]
+    type = 'text'
+    style = 'plain'
+    template = '<black>└─</>›'
+    background = 'transparent'
+    foreground_templates = ['{{ if gt .Code 0 }}red{{ end }}', '{{ if eq .Code 0 }}blue{{ end }}']

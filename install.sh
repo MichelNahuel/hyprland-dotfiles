@@ -58,6 +58,16 @@ done < <(find . -type f -print0 | sort -z)
 
 chmod +x "$CONFIG/waybar/scripts/fecha.sh" "$CONFIG/hypr/scripts/mic-led.sh"
 
+# Logo animado de la consola
+if python3 -c "import PIL" 2>/dev/null; then
+    python3 "$CONFIG/fastfetch/logo-n.py" >/dev/null && info "N animada generada en ~/.cache/fastfetch/logo-n.png"
+else
+    aviso "Falta python-pillow: no se pudo generar la N animada (sudo pacman -S python-pillow)."
+fi
+if ! grep -q 'templates.logo_n' "$CONFIG/matugen/config.toml" 2>/dev/null; then
+    aviso "Para que la N se regenere con cada pintura, agregá [templates.logo_n] a ~/.config/matugen/config.toml (ver README)."
+fi
+
 # 4. Rutas de hyprlock
 sed -i --follow-symlinks "s#__HOME__#$HOME#g" "$CONFIG/hypr/hyprlock.conf"
 for img in kcd_fondo.png vault_boy.png; do
