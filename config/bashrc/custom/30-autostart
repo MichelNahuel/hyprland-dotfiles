@@ -2,7 +2,7 @@
 # AUTOSTART (propia)
 # Reemplaza a ~/.config/bashrc/30-autostart: el cargador de ML4W usa el archivo
 # de custom/ cuando existe uno con el mismo nombre.
-# Igual que el original, más la M animada a la derecha de las especificaciones.
+# Igual que el original, más el bloque animado "N · M ·" centrado.
 # -----------------------------------------------------
 
 # The 'finder' command (Fuzzy Finder)
@@ -30,6 +30,10 @@ finder() {
 if [[ $(tty) == *"pts"* ]]; then
     if [ ! -f $HOME/.config/ml4w/settings/hide-fastfetch ]; then
         fastfetch
-        [ -x "$HOME/.config/fastfetch/derecha.sh" ] && "$HOME/.config/fastfetch/derecha.sh"
+        [ -x "$HOME/.config/fastfetch/centrado.sh" ] && "$HOME/.config/fastfetch/centrado.sh"
+        # Al cambiar el tamaño de la ventana (o al abrir una pestaña, que también la
+        # cambia) las imágenes quedan corridas: se vuelven a dibujar recentradas.
+        # El propio script se abstiene si ya se scrolleó o hay comandos ejecutados.
+        trap '[ -x "$HOME/.config/fastfetch/centrado.sh" ] && "$HOME/.config/fastfetch/centrado.sh"' WINCH
     fi
 fi

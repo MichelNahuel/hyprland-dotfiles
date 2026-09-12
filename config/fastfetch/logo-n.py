@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Genera los logos animados de la consola: una N (logo de fastfetch, a la
-izquierda) y una M (se dibuja a la derecha de las especificaciones con
-`derecha.sh`), ambas de andamio y recorridas por salvas de cuatro olas.
+"""Genera las piezas animadas de la consola: la N, la M y el punto que gira.
 
-Las letras se arman con | / \\ _ ▔ :
+Las letras se arman con | / \\ _ ▔ y las recorren salvas de cuatro olas que suben
+de abajo hacia arriba:
 
     _____        ___          _____      _____
     |/|\\\\\\       |/|          |/|\\\\\\    ///|/|
@@ -27,18 +26,20 @@ propio ciclo según lo que era originalmente:
 La fase se lleva por celda según su papel y no transformando el carácter que se
 ve: un | que pasó a / debe seguir a -, mientras que un / que nació / pasa a \\.
 
-Las olas salen una detrás de otra, separadas por una fila, formando una salva de
-cuatro que sube junta como una banda: cada fila completa su vuelta en cuatro
-pasos seguidos y el resto de la letra queda intacta mientras tanto.
+El punto es aparte: un cuadrado que salta entre las cuatro esquinas (▖ ▘ ▝ ▗), con
+su propio ritmo. Al ser una imagen separada, kitty lo anima con su propio reloj y
+su giro no depende del de las letras. El carácter se dibuja estirado a un lienzo
+cuadrado, porque la celda de texto es el doble de alta que ancha y, si no, cada
+cuadrante se vería como una barra angosta en vez de un cuadrado.
 
-Salida: APNG (transparencia real y bordes suaves). kitty los reproduce en bucle,
+Salida: APNG (transparencia real y bordes suaves), que kitty reproduce en bucle
 sin bloquear el shell.
 
 Colores: de ~/.cache/fastfetch/logo-n-colores (lo escribe matugen con cada
 wallpaper); si no existe, de la paleta de kitty; si tampoco, valores fijos.
 
-Uso: python3 logo-n.py [--salida RUTA] [--salida-m RUTA] [--ancho-celda PX]
-                       [--alto-celda PX] [--gif]
+Uso: python3 logo-n.py [--salida RUTA] [--salida-m RUTA] [--salida-punto RUTA]
+                       [--ancho-celda PX] [--alto-celda PX] [--gif]
 """
 
 import argparse
@@ -54,6 +55,7 @@ COLORES_MATUGEN = os.path.join(HOME, ".cache/fastfetch/logo-n-colores")
 COLORES_KITTY = os.path.join(HOME, ".config/kitty/colors-matugen.conf")
 SALIDA = os.path.join(HOME, ".cache/fastfetch/logo-n.png")
 SALIDA_M = os.path.join(HOME, ".cache/fastfetch/logo-m.png")
+SALIDA_PUNTO = os.path.join(HOME, ".cache/fastfetch/punto.png")
 
 # Celda de texto de kitty: 8 x 19 px con font_size 7 (se usa el doble por nitidez).
 # Si cambia font_size, hay que rehacer estos valores: la imagen debe tener la misma
@@ -71,6 +73,10 @@ OLAS = FASES                    # olas por salva: así cada fila da la vuelta co
 
 MS_PASO = 110                   # cada paso de la salva (avanza una fila)
 MS_CIERRE = 700                 # la letra entera, entre una salva y la siguiente
+
+CICLO_PUNTO = "▖▘▝▗"            # el cuadrado recorriendo las esquinas
+PUNTO_LADO = 76                 # lienzo cuadrado del punto, en píxeles
+PUNTO_MS = 180                  # ritmo propio, independiente del de las letras
 
 # Ciclos de 4 fases por papel de cada celda
 CICLO_RIEL = ("|", "/", "-", "\\")
@@ -186,11 +192,7 @@ def arte_m():
 
 
 def cuadros():
-    """[(fases_por_fila, {fila: nº de ola}, ms)] de una salva de OLAS olas.
-
-    La ola k sale k pasos después de la primera, así que en cada paso hay hasta
-    OLAS olas en vuelo, una por fila consecutiva.
-    """
+    """[(fases_por_fila, {fila: nº de ola}, ms)] de una salva de OLAS olas."""
     fases = [0] * FILAS
     salida = []
     for t in range(FILAS + OLAS - 1):
@@ -234,6 +236,30 @@ def dibujar(g, fases, frentes, fuente, cw, chh, cuerpo, frente):
     return im
 
 
+def cuadros_punto(cuerpo, ruta_tipografia):
+    """El cuadrado saltando entre esquinas, en un lienzo cuadrado.
+
+    Lleva un margen transparente al pie para que el piso del salto quede al mismo
+    nivel que el ▔ de las letras: la imagen de las letras también tiene margen
+    abajo, así que su tinta termina más arriba que su caja, y como la colocación
+    va por celdas enteras esto es lo que permite ajustar los píxeles que faltan.
+    """
+    PIE_PUNTO = 14
+    fuente = ImageFont.truetype(ruta_tipografia, 120)
+    asc, desc = fuente.getmetrics()
+    ancho_celda, alto_celda = int(fuente.getlength("█")), asc + desc
+    salida = []
+    for ch in CICLO_PUNTO:
+        celda = Image.new("RGBA", (ancho_celda, alto_celda), (0, 0, 0, 0))
+        ImageDraw.Draw(celda).text((0, 0), ch, font=fuente, fill=cuerpo + (255,), anchor="la")
+        # se estira la celda a un cuadrado: si no, cada cuadrante sería una barra
+        cuadrado = celda.resize((PUNTO_LADO, PUNTO_LADO), Image.LANCZOS)
+        lienzo = Image.new("RGBA", (PUNTO_LADO, PUNTO_LADO + PIE_PUNTO), (0, 0, 0, 0))
+        lienzo.paste(cuadrado, (0, 0), cuadrado)
+        salida.append(lienzo)
+    return salida
+
+
 def a_paleta(im):
     """RGBA -> cuadro GIF con un índice reservado para la transparencia."""
     alpha = im.getchannel("A")
@@ -244,16 +270,17 @@ def a_paleta(im):
     return q
 
 
-def escribir_apng(ruta, imgs, tiempos):
+def escribir_apng(ruta, imgs, tiempos, disposal=1):
     os.makedirs(os.path.dirname(ruta) or ".", exist_ok=True)
     imgs[0].save(ruta, save_all=True, append_images=imgs[1:], duration=tiempos,
-                 loop=0, disposal=1)
+                 loop=0, disposal=disposal)
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--salida", default=SALIDA, help="APNG de la N (logo de fastfetch)")
-    ap.add_argument("--salida-m", default=SALIDA_M, help="APNG de la M (derecha de los datos)")
+    ap.add_argument("--salida", default=SALIDA, help="APNG de la N")
+    ap.add_argument("--salida-m", default=SALIDA_M, help="APNG de la M")
+    ap.add_argument("--salida-punto", default=SALIDA_PUNTO, help="APNG del punto que gira")
     ap.add_argument("--ancho-celda", type=int, default=ANCHO_CELDA)
     ap.add_argument("--alto-celda", type=int, default=ALTO_CELDA)
     ap.add_argument("--gif", action="store_true",
@@ -264,7 +291,8 @@ def main():
 
     hex_cuerpo, hex_frente = colores()
     cuerpo, frente = a_rgb(hex_cuerpo), a_rgb(hex_frente)
-    fuente = ImageFont.truetype(ruta_fuente(), int(args.alto_celda * 0.82))
+    tipografia = ruta_fuente()
+    fuente = ImageFont.truetype(tipografia, int(args.alto_celda * 0.82))
     secuencia = cuadros()
     tiempos = [ms for _, _, ms in secuencia]
 
@@ -277,6 +305,13 @@ def main():
         escribir_apng(ruta, imgs, tiempos)
         print(f"{ruta}: APNG {nombre}, {len(imgs)} cuadros, {imgs[0].width}x{imgs[0].height}px "
               f"({COLS}x{FILAS} celdas), salva de {OLAS} olas, cuerpo {hex_cuerpo}, frente {hex_frente}")
+
+    if args.salida_punto:
+        # disposal=2 (borrar antes del próximo cuadro): sin eso los cuadrados se acumulan
+        puntos = cuadros_punto(cuerpo, tipografia)
+        escribir_apng(args.salida_punto, puntos, [PUNTO_MS] * len(puntos), disposal=2)
+        print(f"{args.salida_punto}: APNG punto, {len(puntos)} cuadros de {PUNTO_MS}ms, "
+              f"{PUNTO_LADO}x{PUNTO_LADO}px (ritmo propio)")
 
     # La N quieta y blanca para la barra superior (Waybar no anima imágenes en CSS).
     COLOR_BARRA = "#ffffff"

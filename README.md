@@ -23,13 +23,15 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Pantalla de bloqueo** (hyprlock) | Borde de la foto, hora, usuario y campo de contraseña en crema `#e6dfcf` translúcido. |
 | **Terminal** (kitty) | Tipografía chica (7), más aire alrededor del texto (18) y cursor en barra fina. |
 | **Prompt** (oh-my-posh) | Dos líneas con marco fino: `┌─ ruta ── rama` y `└─›`, con la flecha en rojo si el comando falló. |
-| **Bienvenida** (fastfetch) | Lista con el mismo marco fino, sin íconos, con una **N animada** a la izquierda y una **M animada** a la derecha de los datos. |
+| **Bienvenida** (fastfetch) | Especificaciones pegadas a la izquierda y, centrado, el bloque animado `N ▪ M ▪`. |
 | **Wallpaper** | Una pintura al azar en cada arranque, aplicada por ML4W (sin carreras ni `sleep`). |
 
-### Las letras animadas
+### El bloque animado de la consola
 
-La N (logo de fastfetch) y la M (a la derecha de los datos) son letras de "andamio"
-dibujadas con `| / \ _ ▔`:
+Al abrir la terminal, fastfetch imprime las especificaciones a la izquierda (sin logo) y
+`config/fastfetch/centrado.sh` coloca, centrado, el bloque `N ▪ M ▪`.
+
+Las letras son de "andamio", dibujadas con `| / \ _ ▔`:
 
 ```
 _____        ___          _____      _____
@@ -58,16 +60,19 @@ remates     _  ->  -  ->  _  ->  -          (lo mismo el ▔ de abajo)
 Como la salva tiene cuatro olas, al terminar de pasar cada fila volvió exactamente a su lugar
 y la letra queda entera. Mientras la banda viaja, el resto se mantiene legible.
 
-Las genera `config/fastfetch/logo-n.py` como **APNG** en `~/.cache/fastfetch/`, y kitty las
-reproduce en bucle sin bloquear el shell: la N la muestra fastfetch (`--logo-type kitty-icat`,
-disponible desde fastfetch 2.34) y la M la coloca `config/fastfetch/derecha.sh` con
-`kitten icat --place`, llamado desde `bashrc/custom/30-autostart` justo después de fastfetch.
-Los colores salen de la paleta de matugen, así que las letras acompañan a la pintura de fondo.
+Los **puntos** son aparte: un cuadrado que salta entre las cuatro esquinas (`▖ ▘ ▝ ▗`), con su
+propio ritmo, así que su giro no depende del de las letras. El piso del salto queda a ras del
+`▔` de la N y la M.
 
-Detalles de la M a la derecha: se dibuja solo en kitty y solo si la terminal tiene al menos
-90 columnas; se coloca en una posición absoluta de la pantalla, así que acompaña al bloque
-recién impreso al abrir la terminal (si ejecutás `fastfetch` a mano más tarde, no la sigue).
-Como cualquier imagen del terminal, se va con el scroll y desaparece con `clear`.
+Todo lo genera `config/fastfetch/logo-n.py` como **APNG** en `~/.cache/fastfetch/`, y kitty los
+reproduce en bucle sin bloquear el shell. Los colores salen de la paleta de matugen, así que el
+bloque acompaña a la pintura de fondo.
+
+Detalles de la colocación: solo se dibuja en kitty y solo si el bloque (45 columnas) entra
+centrado sin acercarse a las especificaciones; las posiciones son absolutas en pantalla, así que
+`bashrc/custom/30-autostart` engancha un `trap … WINCH` que lo vuelve a dibujar recentrado al
+redimensionar la ventana o abrir una pestaña. Si ya ejecutaste comandos o scrolleaste, no se
+redibuja, para no pintar sobre tu trabajo. Como cualquier imagen del terminal, desaparece con `clear`.
 
 > El mismo script deja una versión quieta y blanca de la N en `~/.config/waybar/assets/logo-n.png`,
 > por si se la quiere usar como logo de la barra. No viene activada: a 34 px de alto el andamio se
@@ -77,10 +82,10 @@ Como cualquier imagen del terminal, se va con el scroll y desaparece con `clear`
 
 - Arch Linux (o derivada) con **Hyprland ≥ 0.53** (probado en 0.56.2; usa la sintaxis `layerrule = …, match:namespace …`).
 - **ML4W Dotfiles** instalados (versión *stable*), con el tema de Waybar `ml4w-transparent-centered`.
-- Paquetes: `waybar`, `swaync`, `nwg-dock-hyprland`, `hyprlock`, `kitty`, `fastfetch` (≥ 2.34),
-  `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar las letras).
+- Paquetes: `waybar`, `swaync`, `nwg-dock-hyprland`, `hyprlock`, `kitty`, `fastfetch`,
+  `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar las piezas).
 - Para el LED de micrófono: una laptop con LED `platform::micmute` (ThinkPad y similares) y `systemd-logind` (viene por defecto).
-- Las letras animadas **solo funcionan en kitty**.
+- El bloque animado **solo funciona en kitty**.
 
 ## Instalación
 
@@ -96,7 +101,7 @@ bash install.sh
 2. Guarda un respaldo de cada archivo que va a reemplazar en `~/backups/hyprland-dotfiles-<fecha>/`
    y anota los archivos nuevos.
 3. Copia los archivos de `config/` a `~/.config/` (respetando los symlinks de ML4W).
-4. Ajusta las rutas de `hyprlock.conf` a tu `$HOME` y genera las letras animadas.
+4. Ajusta las rutas de `hyprlock.conf` a tu `$HOME` y genera las piezas animadas.
 5. Recarga Hyprland, Waybar, el dock, swaync, kitty e inicia el script del LED.
 
 Todo queda aplicado de forma permanente: al encender la computadora, el autostart de ML4W
@@ -124,7 +129,7 @@ y quitá cualquier otro `exec-once` que cambie el wallpaper al iniciar. El scrip
 pintura elegida en la caché de ML4W; al ir encadenado, la caché ya está lista cuando
 `ml4w-autostart` la lee: sin carreras ni `sleep`. Con `Super + Shift + W` se cambia a otra pintura.
 
-**2. Que las letras se regeneren con cada pintura.** Agregá al final de `~/.config/matugen/config.toml`:
+**2. Que las piezas se regeneren con cada pintura.** Agregá al final de `~/.config/matugen/config.toml`:
 
 ```toml
 [templates.logo_n]
@@ -133,7 +138,7 @@ output_path = '~/.cache/fastfetch/logo-n-colores'
 post_hook = 'python3 ~/.config/fastfetch/logo-n.py'
 ```
 
-Sin este paso las letras funcionan igual, pero conservan los colores con los que se generaron.
+Sin este paso el bloque funciona igual, pero conserva los colores con los que se generó.
 
 ### Imágenes (no incluidas)
 
@@ -169,8 +174,9 @@ bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
 | Tamaño de letra de la terminal | `kitty/custom.conf` → `font_size` (al cambiarlo hay que rehacer `ANCHO_CELDA`/`ALTO_CELDA` en `logo-n.py`: son el doble de la celda; medidas: 7→8x19, 8→10x22, 9→11x24, 10→12x27) |
 | Prompt | `ohmyposh/marco.toml` |
 | Datos de la bienvenida | `fastfetch/config.jsonc` |
-| Velocidad y tamaño de las letras | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la letra entera), `COLS`, `FILAS` (si cambiás el tamaño, actualizá `width`/`height` en `fastfetch/config.jsonc`) |
-| Posición de la M | `fastfetch/derecha.sh` → `COLUMNA` y `FILA` |
+| Velocidad y tamaño de las letras | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la letra entera), `COLS`, `FILAS` |
+| Giro y tamaño del punto | `fastfetch/logo-n.py` → `CICLO_PUNTO`, `PUNTO_MS`, `PUNTO_LADO` y `PIE_PUNTO` (margen al pie que alinea el piso del salto) |
+| Posición y separación del bloque | `fastfetch/centrado.sh` → `PUNTO_COLS`, `PUNTO_FILAS`, `HUECO`, `FILA_LETRAS` |
 | LED encendido al mutear (al revés) | `hypr/scripts/mic-led.sh` → intercambiar `valor=0` / `valor=1` |
 | Colores de la pantalla de bloqueo | `hypr/hyprlock.conf` → `rgba(e6dfcf..)` |
 

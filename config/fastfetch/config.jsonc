@@ -2,18 +2,10 @@
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     // Bienvenida minimalista con el mismo marco fino que el prompt.
     // {#30} = gris tenue (color0), {#keys} = color de las etiquetas (acento).
-    // N animada (se invierte de abajo hacia arriba). La genera
-    // ~/.config/fastfetch/logo-n.py y kitty la reproduce en bucle.
+    // Sin logo: las especificaciones van pegadas a la izquierda y las letras
+    // animadas (N · M ·) las coloca centradas ~/.config/fastfetch/centrado.sh
     "logo": {
-        "type": "kitty-icat",
-        "source": "~/.cache/fastfetch/logo-n.png",
-        "width": 16,
-        "height": 10,
-        "padding": {
-            "top": 0,
-            "left": 2,
-            "right": 3
-        }
+        "type": "none"
     },
     "display": {
         "separator": " ",
