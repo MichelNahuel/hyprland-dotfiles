@@ -26,6 +26,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Bienvenida** (fastfetch) | Especificaciones pegadas a la izquierda, el bloque animado `N ▪ M ▪` centrado y una bandera argentina flameando a la derecha. |
 | **Wallpaper** | Una pintura al azar en cada arranque, aplicada por ML4W (sin carreras ni `sleep`). |
 | **Escala del panel** | El monitor interno al 100%: usa la resolución real en vez de escalar al 150%. |
+| **Lanzador** (rofi) | Compacto, translúcido con blur y en JetBrainsMono, sin íconos de colores. Un solo atajo para todo. |
 
 ### El bloque animado de la consola
 
@@ -97,6 +98,24 @@ los toca matugen.
 
 Mide 40x10 celdas. Como la celda de kitty es 8x19 px, en pantalla queda de 320x190,
 o sea 1,68:1 — cerca del 1,56:1 de la bandera real.
+
+### El lanzador
+
+`rofi/config.rasi` reemplaza al de ML4W. La idea es que el lanzador hable el mismo idioma
+que la barra y la consola: panel compacto de 560 px centrado, translúcido con blur, tipografía
+JetBrainsMono y **sin íconos de aplicación a color**, que era lo que más desentonaba. La
+selección es una fila apenas más clara, con el color de la pintura solo en el borde izquierdo
+y el texto.
+
+Los colores salen de `rofi/colors.rasi`, que reescribe matugen con cada pintura, así que el
+lanzador acompaña al wallpaper igual que el resto.
+
+El blur lo dan tres `layerrule` de `hypr/conf/custom.conf`: sin ellas, una translucidez así
+deja el lanzador ilegible sobre la pintura.
+
+Antes había **dos** lanzadores conviviendo: `Super+Espacio` abría wofi (sin tematizar, con el
+aspecto GTK por defecto) y `Super+Ctrl+Enter` abría rofi. Ahora los dos abren el mismo.
+`keybinding.conf` trae ese cambio. wofi no se desinstala: simplemente deja de estar asignado.
 
 ### Escala del panel
 
