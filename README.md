@@ -28,6 +28,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Escala del panel** | El monitor interno al 100%: usa la resolución real en vez de escalar al 150%. |
 | **Lanzador** (rofi) | Compacto, translúcido con blur y en JetBrainsMono, sin íconos de colores. Un solo atajo para todo. |
 | **Menú de capturas** | Mismo aspecto que el lanzador, sin el wallpaper desenfocado de fondo. |
+| **Menú de encendido** | Arreglados los íconos, que no se veían: usaban una fuente sin glifos Nerd. |
 
 ### El bloque animado de la consola
 
@@ -137,6 +138,13 @@ se desinstala: simplemente deja de estar asignado.
 > esperando **una sola línea** con el `source`, y la convierte en una ruta. Cualquier línea de
 > más (un `bind` propio, por ejemplo) deja el menú de atajos vacío. Por eso el atajo del
 > lanzador va en `hypr/conf/custom.conf` y ese archivo no se publica.
+
+### Menú de encendido
+
+`quickshell/PowerApp/PowerWindow.qml` tenía `font.family: "monospace"` para los íconos, que
+son glifos de Nerd Font. La fuente genérica no los trae, así que tres de los cinco botones
+—bloquear, reiniciar y apagar— salían en blanco. Cambiado a `JetBrainsMono Nerd Font Propo`,
+la misma de la barra.
 
 ### Escala del panel
 
