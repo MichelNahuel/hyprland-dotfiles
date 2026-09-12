@@ -1,0 +1,19 @@
+/* -----------------------------------------------------
+ * Lista de atajos de teclado y sidepads. Se invoca con -eh 2, o sea elementos de dos renglones.
+ * El aspecto es el compartido: rofi/estilo.rasi.
+ * ----------------------------------------------------- */
+
+configuration {
+    font:            "JetBrainsMono Nerd Font Propo 10";
+    show-icons:      false;
+    hover-select:    false;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+}
+
+@theme "~/.config/rofi/colors.rasi"
+@import "~/.config/rofi/estilo.rasi"
+
+window   { width: 820px; }
+listview { lines: 12; }
+element  { padding: 5px 10px; }

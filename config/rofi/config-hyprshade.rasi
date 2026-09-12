@@ -1,0 +1,17 @@
+/* -----------------------------------------------------
+ * Filtros de pantalla de hyprshade.
+ * El aspecto es el compartido: rofi/estilo.rasi.
+ * ----------------------------------------------------- */
+
+configuration {
+    font:            "JetBrainsMono Nerd Font Propo 10";
+    show-icons:      false;
+    hover-select:    false;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+}
+
+@theme "~/.config/rofi/colors.rasi"
+@import "~/.config/rofi/estilo.rasi"
+
+window   { width: 460px; }

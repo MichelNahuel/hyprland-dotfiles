@@ -126,9 +126,17 @@ compartido lo anula con `background-image: none`.
 El panel va a `rgba(12, 10, 8, 0.55)`, más sólido que el 0.12 de la barra: un menú tiene que
 leerse sobre cualquier pintura, incluidas las claras.
 
+Todos los menús de rofi comparten el estilo: lanzador, capturas, portapapeles (`Super+V`),
+lista de atajos, temas, efectos de wallpaper, filtros de hyprshade y OCR.
+
 Antes había **dos** lanzadores conviviendo: `Super+Espacio` abría wofi (sin tematizar, con el
-aspecto GTK por defecto) y `Super+Ctrl+Enter` abría rofi. Ahora los dos abren el mismo.
-`keybinding.conf` trae ese cambio. wofi no se desinstala: simplemente deja de estar asignado.
+aspecto GTK por defecto) y `Super+Ctrl+Enter` abría rofi. Ahora los dos abren el mismo. wofi no
+se desinstala: simplemente deja de estar asignado.
+
+> **Ojo con `hypr/conf/keybinding.conf`:** `hypr/scripts/keybindings.sh` lee ese archivo
+> esperando **una sola línea** con el `source`, y la convierte en una ruta. Cualquier línea de
+> más (un `bind` propio, por ejemplo) deja el menú de atajos vacío. Por eso el atajo del
+> lanzador va en `hypr/conf/custom.conf` y ese archivo no se publica.
 
 ### Escala del panel
 
