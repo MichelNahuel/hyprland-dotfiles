@@ -56,19 +56,20 @@ while IFS= read -r -d '' f; do
     info "instalado: $rel"
 done < <(find . -type f -print0 | sort -z)
 
-chmod +x "$CONFIG/waybar/scripts/fecha.sh" "$CONFIG/hypr/scripts/mic-led.sh"
+chmod +x "$CONFIG/waybar/scripts/fecha.sh" "$CONFIG/hypr/scripts/mic-led.sh" \
+         "$CONFIG/fastfetch/derecha.sh"
 
-# Logo animado de la consola. El generador deja también una N quieta en
+# Letras animadas de la consola. El generador deja también una N quieta en
 # waybar/assets/: si no existía, se anota como archivo nuevo para que
 # restaurar.sh la borre al deshacer la instalación.
 [ -e "$CONFIG/waybar/assets/logo-n.png" ] || echo "waybar/assets/logo-n.png" >> "$BACKUP/nuevos.txt"
 if python3 -c "import PIL" 2>/dev/null; then
-    python3 "$CONFIG/fastfetch/logo-n.py" >/dev/null && info "N animada generada en ~/.cache/fastfetch/logo-n.png"
+    python3 "$CONFIG/fastfetch/logo-n.py" >/dev/null && info "N y M animadas generadas en ~/.cache/fastfetch/"
 else
-    aviso "Falta python-pillow: no se pudo generar la N animada (sudo pacman -S python-pillow)."
+    aviso "Falta python-pillow: no se pudieron generar las letras animadas (sudo pacman -S python-pillow)."
 fi
 if ! grep -q 'templates.logo_n' "$CONFIG/matugen/config.toml" 2>/dev/null; then
-    aviso "Para que la N se regenere con cada pintura, agregá [templates.logo_n] a ~/.config/matugen/config.toml (ver README)."
+    aviso "Para que las letras se regeneren con cada pintura, agregá [templates.logo_n] a ~/.config/matugen/config.toml (ver README)."
 fi
 
 # 4. Rutas de hyprlock
@@ -100,7 +101,8 @@ while IFS= read -r rel; do
 done < "$B/nuevos.txt"
 
 # Archivos generados fuera de la configuración
-rm -f "$HOME/.cache/fastfetch/logo-n.png" "$HOME/.cache/fastfetch/logo-n-colores"
+rm -f "$HOME/.cache/fastfetch/logo-n.png" "$HOME/.cache/fastfetch/logo-m.png" \
+      "$HOME/.cache/fastfetch/logo-n-colores"
 rmdir "$HOME/.cache/fastfetch" 2>/dev/null
 
 if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
@@ -120,6 +122,7 @@ if [ "${NO_RELOAD:-0}" != "1" ] && [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; th
     setsid -f "$CONFIG/waybar/launch.sh" >/dev/null 2>&1 </dev/null
     setsid -f "$CONFIG/nwg-dock-hyprland/launch.sh" >/dev/null 2>&1 </dev/null
     swaync-client -rs >/dev/null 2>&1 || true
+    pkill -USR1 -x kitty 2>/dev/null
     detener_led
     setsid -f "$CONFIG/hypr/scripts/mic-led.sh" >/dev/null 2>&1 </dev/null
 else

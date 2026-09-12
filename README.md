@@ -21,29 +21,30 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Notificaciones** (swaync) | Tema `custom`: translúcidas (5%), esquinas rectas, blur que muestra lo que hay detrás (sin xray). |
 | **Cursor** | No salta al centro de la ventana al enfocarla (`cursor:no_warps`). |
 | **Pantalla de bloqueo** (hyprlock) | Borde de la foto, hora, usuario y campo de contraseña en crema `#e6dfcf` translúcido. |
-| **Terminal** (kitty) | Tipografía legible (10), más aire alrededor del texto (18) y cursor en barra fina. |
+| **Terminal** (kitty) | Tipografía chica (7), más aire alrededor del texto (18) y cursor en barra fina. |
 | **Prompt** (oh-my-posh) | Dos líneas con marco fino: `┌─ ruta ── rama` y `└─›`, con la flecha en rojo si el comando falló. |
-| **Bienvenida** (fastfetch) | Lista con el mismo marco fino, sin íconos, y una **N animada** hecha con caracteres. |
+| **Bienvenida** (fastfetch) | Lista con el mismo marco fino, sin íconos, con una **N animada** a la izquierda y una **M animada** a la derecha de los datos. |
 | **Wallpaper** | Una pintura al azar en cada arranque, aplicada por ML4W (sin carreras ni `sleep`). |
 
-### La N animada
+### Las letras animadas
 
-El logo de fastfetch es una N de "andamio" dibujada con `| / \ _ ▔`:
+La N (logo de fastfetch) y la M (a la derecha de los datos) son letras de "andamio"
+dibujadas con `| / \ _ ▔`:
 
 ```
-_____        ___
-|/|\\\       |/|
-|\| \\\      |\|
-|/|  \\\     |/|
-|\|   \\\    |\|
-|/|    \\\   |/|
-|\|     \\\  |\|
-|/|      \\\ |/|
-|\|       \\\|\|
-▔▔▔        ▔▔▔▔▔
+_____        ___          _____      _____
+|/|\\\       |/|          |/|\\\    ///|/|
+|\| \\\      |\|          |\| \\\  /// |\|
+|/|  \\\     |/|          |/|  \\\///  |/|
+|\|   \\\    |\|          |\|   \\//   |\|
+|/|    \\\   |/|          |/|          |/|
+|\|     \\\  |\|          |\|          |\|
+|/|      \\\ |/|          |/|          |/|
+|\|       \\\|\|          |\|          |\|
+▔▔▔        ▔▔▔▔▔          ▔▔▔          ▔▔▔
 ```
 
-La recorren **salvas de cuatro olas** que suben de abajo hacia arriba, una detrás de otra,
+Las recorren **salvas de cuatro olas** que suben de abajo hacia arriba, una detrás de otra,
 separadas por una fila. Cada ola hace avanzar una fase a la fila que toca, y cada carácter
 sigue el ciclo de su papel original:
 
@@ -55,25 +56,31 @@ remates     _  ->  -  ->  _  ->  -          (lo mismo el ▔ de abajo)
 ```
 
 Como la salva tiene cuatro olas, al terminar de pasar cada fila volvió exactamente a su lugar
-y la N queda entera. Mientras la banda viaja, el resto de la letra se mantiene legible.
+y la letra queda entera. Mientras la banda viaja, el resto se mantiene legible.
 
-La genera `config/fastfetch/logo-n.py` como **APNG** en `~/.cache/fastfetch/logo-n.png`, y
-kitty la reproduce en bucle sin bloquear el shell (fastfetch la muestra con `--logo-type kitty-icat`,
-disponible desde fastfetch 2.34). Los colores salen de la paleta de matugen, así que la N
-acompaña a la pintura de fondo.
+Las genera `config/fastfetch/logo-n.py` como **APNG** en `~/.cache/fastfetch/`, y kitty las
+reproduce en bucle sin bloquear el shell: la N la muestra fastfetch (`--logo-type kitty-icat`,
+disponible desde fastfetch 2.34) y la M la coloca `config/fastfetch/derecha.sh` con
+`kitten icat --place`, llamado desde `bashrc/custom/30-autostart` justo después de fastfetch.
+Los colores salen de la paleta de matugen, así que las letras acompañan a la pintura de fondo.
 
-> El mismo script deja una versión quieta y blanca en `~/.config/waybar/assets/logo-n.png`, por si
-> se la quiere usar como logo de la barra. No viene activada: a 34 px de alto el andamio se agrisa
-> y se pierde, así que en la barra va la marca `N.M.` como texto. El CSS tiene anotado cómo cambiarlo.
+Detalles de la M a la derecha: se dibuja solo en kitty y solo si la terminal tiene al menos
+90 columnas; se coloca en una posición absoluta de la pantalla, así que acompaña al bloque
+recién impreso al abrir la terminal (si ejecutás `fastfetch` a mano más tarde, no la sigue).
+Como cualquier imagen del terminal, se va con el scroll y desaparece con `clear`.
+
+> El mismo script deja una versión quieta y blanca de la N en `~/.config/waybar/assets/logo-n.png`,
+> por si se la quiere usar como logo de la barra. No viene activada: a 34 px de alto el andamio se
+> agrisa y se pierde, así que en la barra va la marca `N.M.` como texto. El CSS tiene anotado cómo cambiarlo.
 
 ## Requisitos
 
 - Arch Linux (o derivada) con **Hyprland ≥ 0.53** (probado en 0.56.2; usa la sintaxis `layerrule = …, match:namespace …`).
 - **ML4W Dotfiles** instalados (versión *stable*), con el tema de Waybar `ml4w-transparent-centered`.
 - Paquetes: `waybar`, `swaync`, `nwg-dock-hyprland`, `hyprlock`, `kitty`, `fastfetch` (≥ 2.34),
-  `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar la N).
+  `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar las letras).
 - Para el LED de micrófono: una laptop con LED `platform::micmute` (ThinkPad y similares) y `systemd-logind` (viene por defecto).
-- La N animada **solo funciona en kitty**.
+- Las letras animadas **solo funcionan en kitty**.
 
 ## Instalación
 
@@ -89,8 +96,8 @@ bash install.sh
 2. Guarda un respaldo de cada archivo que va a reemplazar en `~/backups/hyprland-dotfiles-<fecha>/`
    y anota los archivos nuevos.
 3. Copia los archivos de `config/` a `~/.config/` (respetando los symlinks de ML4W).
-4. Ajusta las rutas de `hyprlock.conf` a tu `$HOME` y genera la N animada.
-5. Recarga Hyprland, Waybar, el dock, swaync e inicia el script del LED.
+4. Ajusta las rutas de `hyprlock.conf` a tu `$HOME` y genera las letras animadas.
+5. Recarga Hyprland, Waybar, el dock, swaync, kitty e inicia el script del LED.
 
 Todo queda aplicado de forma permanente: al encender la computadora, el autostart de ML4W
 lanza Waybar, el dock y swaync con estos temas, y `hypr/conf/custom.conf` inicia el script del LED.
@@ -117,7 +124,7 @@ y quitá cualquier otro `exec-once` que cambie el wallpaper al iniciar. El scrip
 pintura elegida en la caché de ML4W; al ir encadenado, la caché ya está lista cuando
 `ml4w-autostart` la lee: sin carreras ni `sleep`. Con `Super + Shift + W` se cambia a otra pintura.
 
-**2. Que la N se regenere con cada pintura.** Agregá al final de `~/.config/matugen/config.toml`:
+**2. Que las letras se regeneren con cada pintura.** Agregá al final de `~/.config/matugen/config.toml`:
 
 ```toml
 [templates.logo_n]
@@ -126,7 +133,7 @@ output_path = '~/.cache/fastfetch/logo-n-colores'
 post_hook = 'python3 ~/.config/fastfetch/logo-n.py'
 ```
 
-Sin este paso la N funciona igual, pero conserva los colores con los que se generó.
+Sin este paso las letras funcionan igual, pero conservan los colores con los que se generaron.
 
 ### Imágenes (no incluidas)
 
@@ -159,10 +166,11 @@ bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
 | Íconos de la barra | `waybar/modules.json` (glifos `md-*` de Nerd Fonts: <https://www.nerdfonts.com/cheat-sheet>) |
 | Transparencia de notificaciones | `swaync/themes/custom/style.css` → `alpha(@surface_container_lowest, 0.05)` |
 | Estilo del dock | `nwg-dock-hyprland/themes/custom/style.css` |
-| Tipografía y márgenes de la terminal | `kitty/custom.conf` → `font_size`, `window_padding_width` |
+| Tamaño de letra de la terminal | `kitty/custom.conf` → `font_size` (al cambiarlo hay que rehacer `ANCHO_CELDA`/`ALTO_CELDA` en `logo-n.py`: son el doble de la celda; medidas: 7→8x19, 8→10x22, 9→11x24, 10→12x27) |
 | Prompt | `ohmyposh/marco.toml` |
 | Datos de la bienvenida | `fastfetch/config.jsonc` |
-| Velocidad de la N y tamaño | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la N entera), `COLS`, `FILAS` (si cambiás el tamaño, actualizá `width`/`height` en `fastfetch/config.jsonc`) |
+| Velocidad y tamaño de las letras | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la letra entera), `COLS`, `FILAS` (si cambiás el tamaño, actualizá `width`/`height` en `fastfetch/config.jsonc`) |
+| Posición de la M | `fastfetch/derecha.sh` → `COLUMNA` y `FILA` |
 | LED encendido al mutear (al revés) | `hypr/scripts/mic-led.sh` → intercambiar `valor=0` / `valor=1` |
 | Colores de la pantalla de bloqueo | `hypr/hyprlock.conf` → `rgba(e6dfcf..)` |
 
@@ -176,7 +184,7 @@ Después de editar: `Super + Shift + B` recarga Waybar, `swaync-client -rs` reca
 - Si cambiás el estilo de decoración desde la app de ML4W, copiá las líneas de `nwg-dock` de
   `hypr/conf/decorations/rounding-all-blur-no-shadows.conf` al nuevo archivo para mantener el blur del dock.
 - Si cambiás el tema de Waybar con el selector de ML4W, la barra deja de usar esta configuración.
-- El prompt se carga desde `~/.config/bashrc/custom/20-customization`, el mecanismo que ML4W
+- El prompt y la bienvenida se cargan desde `~/.config/bashrc/custom/`, el mecanismo que ML4W
   reserva para reemplazar sus propios archivos.
 
 ## Créditos

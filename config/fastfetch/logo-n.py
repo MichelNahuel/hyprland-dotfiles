@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-"""Genera el logo animado de fastfetch: una N de andamio recorrida por salvas de
-cuatro olas que suben de abajo hacia arriba.
+"""Genera los logos animados de la consola: una N (logo de fastfetch, a la
+izquierda) y una M (se dibuja a la derecha de las especificaciones con
+`derecha.sh`), ambas de andamio y recorridas por salvas de cuatro olas.
 
-La letra se arma con | / \\ _ ▔ :
+Las letras se arman con | / \\ _ ▔ :
 
-    _____        ___
-    |/|\\\\\\       |/|
-    |\\| \\\\\\      |\\|
-    |/|  \\\\\\     |/|
-    |\\|   \\\\\\    |\\|
-    |/|    \\\\\\   |/|
-    |\\|     \\\\\\  |\\|
-    |/|      \\\\\\ |/|
-    |\\|       \\\\\\|\\|
-    ▔▔▔        ▔▔▔▔▔
+    _____        ___          _____      _____
+    |/|\\\\\\       |/|          |/|\\\\\\    ///|/|
+    |\\| \\\\\\      |\\|          |\\| \\\\\\  /// |\\|
+    |/|  \\\\\\     |/|          |/|  \\\\\\///  |/|
+    |\\|   \\\\\\    |\\|          |\\|   \\\\//   |\\|
+    |/|    \\\\\\   |/|          |/|          |/|
+    |\\|     \\\\\\  |\\|          |\\|          |\\|
+    |/|      \\\\\\ |/|          |/|          |/|
+    |\\|       \\\\\\|\\|          |\\|          |\\|
+    ▔▔▔        ▔▔▔▔▔          ▔▔▔          ▔▔▔
 
 Cada ola que pasa por una fila la hace avanzar una fase, y cada carácter sigue su
 propio ciclo según lo que era originalmente:
@@ -28,16 +29,16 @@ ve: un | que pasó a / debe seguir a -, mientras que un / que nació / pasa a \\
 
 Las olas salen una detrás de otra, separadas por una fila, formando una salva de
 cuatro que sube junta como una banda: cada fila completa su vuelta en cuatro
-pasos seguidos y el resto de la letra queda intacta mientras tanto. Cuando la
-salva termina de salir por arriba, la N está otra vez entera.
+pasos seguidos y el resto de la letra queda intacta mientras tanto.
 
-Salida: APNG (transparencia real y bordes suaves). kitty lo reproduce en bucle,
-sin bloquear el shell, y fastfetch lo muestra con --logo-type kitty-icat.
+Salida: APNG (transparencia real y bordes suaves). kitty los reproduce en bucle,
+sin bloquear el shell.
 
 Colores: de ~/.cache/fastfetch/logo-n-colores (lo escribe matugen con cada
 wallpaper); si no existe, de la paleta de kitty; si tampoco, valores fijos.
 
-Uso: python3 logo-n.py [--salida RUTA] [--ancho-celda PX] [--alto-celda PX] [--gif]
+Uso: python3 logo-n.py [--salida RUTA] [--salida-m RUTA] [--ancho-celda PX]
+                       [--alto-celda PX] [--gif]
 """
 
 import argparse
@@ -52,19 +53,24 @@ HOME = os.path.expanduser("~")
 COLORES_MATUGEN = os.path.join(HOME, ".cache/fastfetch/logo-n-colores")
 COLORES_KITTY = os.path.join(HOME, ".config/kitty/colors-matugen.conf")
 SALIDA = os.path.join(HOME, ".cache/fastfetch/logo-n.png")
+SALIDA_M = os.path.join(HOME, ".cache/fastfetch/logo-m.png")
 
-# Celda de texto de kitty: 12 x 27 px con font_size 10 (se usa el doble por nitidez)
-ANCHO_CELDA = 24
-ALTO_CELDA = 54
+# Celda de texto de kitty: 8 x 19 px con font_size 7 (se usa el doble por nitidez).
+# Si cambia font_size, hay que rehacer estos valores: la imagen debe tener la misma
+# proporción que la grilla de celdas o el logo deja de encajar en su caja.
+# Medidas conocidas: 7 -> 8x19 | 7.5 -> 9x20 | 8 -> 10x22 | 9 -> 11x24 | 10 -> 12x27
+ANCHO_CELDA = 16
+ALTO_CELDA = 38
 
 COLS, FILAS = 16, 10            # 8 filas de cuerpo + 2 de remates
 ANDAMIO = 3                     # ancho de cada trazo vertical
 TAPA_LARGA = 5                  # remate que cierra andamio + esquina de la diagonal
+HONDURA_V = 4                   # filas que baja la V de la M
 FASES = 4                       # largo del ciclo de cada carácter
 OLAS = FASES                    # olas por salva: así cada fila da la vuelta completa
 
 MS_PASO = 110                   # cada paso de la salva (avanza una fila)
-MS_CIERRE = 700                 # la N entera, entre una salva y la siguiente
+MS_CIERRE = 700                 # la letra entera, entre una salva y la siguiente
 
 # Ciclos de 4 fases por papel de cada celda
 CICLO_RIEL = ("|", "/", "-", "\\")
@@ -127,11 +133,8 @@ def ruta_fuente():
 
 
 # ------------------------------------------------------------------------ arte
-def arte():
-    """Grilla COLS x FILAS donde cada celda es None o su ciclo de 4 fases."""
-    g = [[None] * COLS for _ in range(FILAS)]
-
-    # remates
+def _andamios(g):
+    """Rieles de andamio a los costados y remates arriba y abajo."""
     for c in range(0, TAPA_LARGA):
         g[0][c] = CICLO_TAPA_ALTA
     for c in range(COLS - ANDAMIO, COLS):
@@ -140,15 +143,45 @@ def arte():
         g[FILAS - 1][c] = CICLO_TAPA_BAJA
     for c in range(COLS - TAPA_LARGA, COLS):
         g[FILAS - 1][c] = CICLO_TAPA_BAJA
-
-    # cuerpo: andamios a los costados y diagonal bajando
     for r in range(1, FILAS - 1):
         i = r - 1
         interno = ciclo_barra("/" if i % 2 == 0 else "\\")
         g[r][0], g[r][1], g[r][2] = CICLO_RIEL, interno, CICLO_RIEL
         g[r][COLS - 3], g[r][COLS - 2], g[r][COLS - 1] = CICLO_RIEL, interno, CICLO_RIEL
+
+
+def arte():
+    """La N: andamios + diagonal bajando de izquierda a derecha."""
+    g = [[None] * COLS for _ in range(FILAS)]
+    _andamios(g)
+    for r in range(1, FILAS - 1):
+        i = r - 1
         for c in range(ANDAMIO + i, ANDAMIO + i + 3):
             g[r][c] = ciclo_barra("\\")
+    return g
+
+
+def arte_m():
+    """La M: andamios + la V del medio, con el cruce repartido por la mitad."""
+    g = [[None] * COLS for _ in range(FILAS)]
+    _andamios(g)
+    # En la M las dos diagonales arrancan arriba y ninguna llega abajo: remates
+    # largos (5) en las dos esquinas de arriba y cortos (3) en las de abajo.
+    for c in range(COLS - TAPA_LARGA, COLS):
+        g[0][c] = CICLO_TAPA_ALTA
+    for c in range(COLS - TAPA_LARGA, COLS - ANDAMIO):
+        g[FILAS - 1][c] = None
+    medio = (COLS - 1) // 2
+    for r in range(1, FILAS - 1):
+        i = r - 1
+        if i >= HONDURA_V:
+            continue
+        for c in range(ANDAMIO + i, ANDAMIO + i + 3):
+            if c <= medio:
+                g[r][c] = ciclo_barra("\\")
+        for c in range(COLS - 6 - i, COLS - 3 - i):
+            if c > medio:
+                g[r][c] = ciclo_barra("/")
     return g
 
 
@@ -171,7 +204,7 @@ def cuadros():
                 fases[r] += 1
                 frentes[r] = k
         salida.append((list(fases), frentes, MS_PASO))
-    salida.append((list(fases), {}, MS_CIERRE))   # la N entera antes de la próxima salva
+    salida.append((list(fases), {}, MS_CIERRE))   # la letra entera antes de la próxima salva
     return salida
 
 
@@ -182,7 +215,12 @@ def texto(g, fases):
 
 
 def dibujar(g, fases, frentes, fuente, cw, chh, cuerpo, frente):
-    im = Image.new("RGBA", (COLS * cw, FILAS * chh), (0, 0, 0, 0))
+    # fastfetch/icat colocan la imagen unos píxeles más abajo de lo que corresponde:
+    # con font_size 9 sobraban 7 px y con 7 sobraban 8, o sea casi lo mismo en píxeles
+    # de pantalla. Este margen transparente al pie hace que la imagen se escale un
+    # poco más chica y su base suba, quedando a ras de la última línea de datos.
+    PIE = 16
+    im = Image.new("RGBA", (COLS * cw, FILAS * chh + PIE), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     for r, fila in enumerate(g):
         color = cuerpo
@@ -206,13 +244,20 @@ def a_paleta(im):
     return q
 
 
+def escribir_apng(ruta, imgs, tiempos):
+    os.makedirs(os.path.dirname(ruta) or ".", exist_ok=True)
+    imgs[0].save(ruta, save_all=True, append_images=imgs[1:], duration=tiempos,
+                 loop=0, disposal=1)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--salida", default=SALIDA, help="ruta del APNG de salida")
+    ap.add_argument("--salida", default=SALIDA, help="APNG de la N (logo de fastfetch)")
+    ap.add_argument("--salida-m", default=SALIDA_M, help="APNG de la M (derecha de los datos)")
     ap.add_argument("--ancho-celda", type=int, default=ANCHO_CELDA)
     ap.add_argument("--alto-celda", type=int, default=ALTO_CELDA)
     ap.add_argument("--gif", action="store_true",
-                    help="además, escribir un .gif (paleta de 256 colores, bordes duros)")
+                    help="además, escribir un .gif de la N (paleta de 256 colores)")
     ap.add_argument("--barra", default=os.path.join(HOME, ".config/waybar/assets/logo-n.png"),
                     help="PNG fijo de la N para la barra superior (vacío para no escribirlo)")
     args = ap.parse_args()
@@ -220,26 +265,24 @@ def main():
     hex_cuerpo, hex_frente = colores()
     cuerpo, frente = a_rgb(hex_cuerpo), a_rgb(hex_frente)
     fuente = ImageFont.truetype(ruta_fuente(), int(args.alto_celda * 0.82))
-
-    g = arte()
     secuencia = cuadros()
-    imgs = [dibujar(g, fases, frentes, fuente, args.ancho_celda, args.alto_celda, cuerpo, frente)
-            for fases, frentes, _ in secuencia]
     tiempos = [ms for _, _, ms in secuencia]
 
-    os.makedirs(os.path.dirname(args.salida) or ".", exist_ok=True)
-    imgs[0].save(args.salida, save_all=True, append_images=imgs[1:], duration=tiempos,
-                 loop=0, disposal=1)
-    print(f"{args.salida}: APNG, {len(imgs)} cuadros, {imgs[0].width}x{imgs[0].height}px "
-          f"({COLS}x{FILAS} celdas), salva de {OLAS} olas, cuerpo {hex_cuerpo}, frente {hex_frente}")
+    for ruta, grilla, nombre in ((args.salida, arte(), "N"), (args.salida_m, arte_m(), "M")):
+        if not ruta:
+            continue
+        imgs = [dibujar(grilla, fases, frentes, fuente, args.ancho_celda, args.alto_celda,
+                        cuerpo, frente)
+                for fases, frentes, _ in secuencia]
+        escribir_apng(ruta, imgs, tiempos)
+        print(f"{ruta}: APNG {nombre}, {len(imgs)} cuadros, {imgs[0].width}x{imgs[0].height}px "
+              f"({COLS}x{FILAS} celdas), salva de {OLAS} olas, cuerpo {hex_cuerpo}, frente {hex_frente}")
 
-    # La misma N, quieta, para la barra superior (Waybar no anima imágenes en CSS).
-    # Va del color de los demás íconos de la barra (blancos), no del acento de la
-    # pintura: sobre la barra translúcida el acento queda desvaído.
+    # La N quieta y blanca para la barra superior (Waybar no anima imágenes en CSS).
     COLOR_BARRA = "#ffffff"
     if args.barra:
         tinta = a_rgb(COLOR_BARRA)
-        quieto = dibujar(g, [0] * FILAS, {}, fuente, args.ancho_celda, args.alto_celda,
+        quieto = dibujar(arte(), [0] * FILAS, {}, fuente, args.ancho_celda, args.alto_celda,
                          tinta, tinta)
         os.makedirs(os.path.dirname(args.barra) or ".", exist_ok=True)
         quieto.save(args.barra)
@@ -247,6 +290,8 @@ def main():
 
     if args.gif:
         ruta_gif = os.path.splitext(args.salida)[0] + ".gif"
+        imgs = [dibujar(arte(), f, fr, fuente, args.ancho_celda, args.alto_celda, cuerpo, frente)
+                for f, fr, _ in secuencia]
         gif = [a_paleta(im) for im in imgs]
         gif[0].save(ruta_gif, save_all=True, append_images=gif[1:], duration=tiempos,
                     loop=0, transparency=255, disposal=2, optimize=False)
