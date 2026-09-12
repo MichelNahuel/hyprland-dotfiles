@@ -25,6 +25,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Prompt** (oh-my-posh) | Dos líneas con marco fino: `┌─ ruta ── rama` y `└─›`, con la flecha en rojo si el comando falló. |
 | **Bienvenida** (fastfetch) | Especificaciones pegadas a la izquierda, el bloque animado `N ▪ M ▪` centrado y una bandera argentina flameando a la derecha. |
 | **Wallpaper** | Una pintura al azar en cada arranque, aplicada por ML4W (sin carreras ni `sleep`). |
+| **Escala del panel** | El monitor interno al 100%: usa la resolución real en vez de escalar al 150%. |
 
 ### El bloque animado de la consola
 
@@ -96,6 +97,19 @@ los toca matugen.
 
 Mide 40x10 celdas. Como la celda de kitty es 8x19 px, en pantalla queda de 320x190,
 o sea 1,68:1 — cerca del 1,56:1 de la bandera real.
+
+### Escala del panel
+
+`hypr/conf/custom.conf` trae `monitor = eDP-1,preferred,auto,1`, que deja el panel interno
+al 100% de escala: en un 1920x1200 se usan los 1920x1200 reales en vez de los 1280x800 que
+da la escala 1.5. Entra bastante más contenido, a costa de que todo se vea más chico.
+
+El logo de la consola no se deforma: la escala multiplica ancho y alto por igual, así que la
+celda de kitty conserva su proporción, y como los PNG están dibujados al doble de resolución
+con la celda más chica se ven incluso más nítidos.
+
+Si tu panel interno no se llama `eDP-1` (miralo con `hyprctl monitors`), cambiá el nombre.
+Para volver al valor por defecto, borrá esa línea.
 
 ## Requisitos
 
