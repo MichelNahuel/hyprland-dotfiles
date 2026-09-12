@@ -1,0 +1,88 @@
+/* -----------------------------------------------------
+ * Estilo común de todos los menús de rofi: el mismo idioma
+ * que la barra y la consola. Translúcido con blur (las
+ * layerrule de rofi están en hypr/conf/custom.conf),
+ * compacto, sin imagen de fondo y sin pastillas redondeadas.
+ * Los colores salen de colors.rasi, que reescribe matugen.
+ * ----------------------------------------------------- */
+
+* {
+    fondo:            rgba(12, 10, 8, 0.55);
+    tinta:            @on-surface;
+    tenue:            @on-surface-variant;
+    acento:           @primary;
+    linea:            rgba(255, 255, 255, 0.12);
+    background-color: transparent;
+    text-color:       @tinta;
+}
+
+window {
+    transparency:     "real";
+    location:         center;
+    anchor:           center;
+    width:            560px;
+    border:           1px;
+    border-color:     @linea;
+    border-radius:    6px;
+    background-color: @fondo;
+    padding:          0px;
+    children:         [ mainbox ];
+}
+
+/* sin background-image: el wallpaper desenfocado embarra el panel */
+mainbox {
+    padding:          0px;
+    background-color: transparent;
+    background-image: none;
+    children:         [ inputbar, listview ];
+}
+
+inputbar {
+    padding:      14px 16px;
+    spacing:      10px;
+    border:       0px 0px 1px 0px;
+    border-color: @linea;
+    children:     [ prompt, entry ];
+}
+
+prompt { text-color: @acento; }
+
+entry {
+    placeholder-color: @tenue;
+    cursor:            text;
+}
+
+listview {
+    columns:      1;
+    fixed-height: false;
+    scrollbar:    false;
+    padding:      6px 6px;
+    spacing:      1px;
+}
+
+element {
+    padding:       7px 10px;
+    border-radius: 4px;
+    cursor:        pointer;
+}
+
+element normal normal    { text-color: @tinta; }
+element alternate normal { text-color: @tinta; }
+
+element selected normal,
+element selected active {
+    background-color: rgba(255, 255, 255, 0.08);
+    text-color:       @acento;
+    border:           0px 0px 0px 2px;
+    border-color:     @acento;
+}
+
+element-text {
+    background-color: transparent;
+    text-color:       inherit;
+    vertical-align:   0.5;
+}
+
+element-icon { size: 0px; }
+
+error-message { padding: 16px; }

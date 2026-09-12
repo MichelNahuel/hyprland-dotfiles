@@ -27,6 +27,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Wallpaper** | Una pintura al azar en cada arranque, aplicada por ML4W (sin carreras ni `sleep`). |
 | **Escala del panel** | El monitor interno al 100%: usa la resolución real en vez de escalar al 150%. |
 | **Lanzador** (rofi) | Compacto, translúcido con blur y en JetBrainsMono, sin íconos de colores. Un solo atajo para todo. |
+| **Menú de capturas** | Mismo aspecto que el lanzador, sin el wallpaper desenfocado de fondo. |
 
 ### El bloque animado de la consola
 
@@ -112,6 +113,18 @@ lanzador acompaña al wallpaper igual que el resto.
 
 El blur lo dan tres `layerrule` de `hypr/conf/custom.conf`: sin ellas, una translucidez así
 deja el lanzador ilegible sobre la pintura.
+
+El aspecto vive en `rofi/estilo.rasi`, compartido: `config.rasi` (lanzador) y
+`config-screenshot.rasi` (menú de capturas, que invoca `hypr/scripts/screenshot.sh`) solo
+traen su bloque `configuration` y lo importan. Para alinear cualquier otro menú de rofi
+alcanza con hacer lo mismo.
+
+El menú de capturas de ML4W metía el wallpaper desenfocado como fondo del panel
+(`background-image: @current-image`), que con una pintura detrás queda embarrado. El estilo
+compartido lo anula con `background-image: none`.
+
+El panel va a `rgba(12, 10, 8, 0.55)`, más sólido que el 0.12 de la barra: un menú tiene que
+leerse sobre cualquier pintura, incluidas las claras.
 
 Antes había **dos** lanzadores conviviendo: `Super+Espacio` abría wofi (sin tematizar, con el
 aspecto GTK por defecto) y `Super+Ctrl+Enter` abría rofi. Ahora los dos abren el mismo.

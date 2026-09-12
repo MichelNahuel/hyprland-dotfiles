@@ -1,9 +1,6 @@
 /* -----------------------------------------------------
- * Lanzador en el mismo idioma que la barra y la consola:
- * translúcido con blur, compacto, sin íconos de colores y
- * en JetBrainsMono. Reemplaza al config de ML4W.
- * Los colores salen de colors.rasi, que reescribe matugen
- * con cada pintura.
+ * Lanzador. El aspecto vive en estilo.rasi, compartido con
+ * los demás menús de rofi. Reemplaza al config de ML4W.
  * ----------------------------------------------------- */
 
 configuration {
@@ -22,85 +19,7 @@ configuration {
 }
 
 @theme "~/.config/rofi/colors.rasi"
+@import "~/.config/rofi/estilo.rasi"
 
-* {
-    fondo:        rgba(12, 10, 8, 0.30);
-    tinta:        @on-surface;
-    tenue:        @on-surface-variant;
-    acento:       @primary;
-    linea:        rgba(255, 255, 255, 0.12);
-    background-color: transparent;
-    text-color:   @tinta;
-}
-
-window {
-    transparency:     "real";
-    location:         center;
-    anchor:           center;
-    width:            560px;
-    border:           1px;
-    border-color:     @linea;
-    border-radius:    6px;
-    background-color: @fondo;
-    padding:          0px;
-    children:         [ mainbox ];
-}
-
-mainbox {
-    padding:  0px;
-    children: [ inputbar, listview ];
-}
-
-/* ---- barra de búsqueda: una línea fina abajo, como la barra superior ---- */
-inputbar {
-    padding:              14px 16px;
-    spacing:              10px;
-    border:               0px 0px 1px 0px;
-    border-color:         @linea;
-    children:             [ prompt, entry ];
-}
-
-prompt {
-    text-color: @acento;
-}
-
-entry {
-    placeholder:        "buscar";
-    placeholder-color:  @tenue;
-    cursor:             text;
-}
-
-/* ---- lista ---- */
-listview {
-    lines:        8;
-    columns:      1;
-    fixed-height: false;
-    scrollbar:    false;
-    padding:      6px 6px;
-    spacing:      1px;
-}
-
-element {
-    padding:       7px 10px;
-    border-radius: 4px;
-    cursor:        pointer;
-}
-
-element normal normal   { text-color: @tinta; }
-element alternate normal { text-color: @tinta; }
-
-element selected normal,
-element selected active {
-    background-color: rgba(255, 255, 255, 0.08);
-    text-color:       @acento;
-    border:           0px 0px 0px 2px;
-    border-color:     @acento;
-}
-
-element-text {
-    background-color: transparent;
-    text-color:       inherit;
-    vertical-align:   0.5;
-}
-
-error-message { padding: 16px; }
+listview { lines: 8; }
+entry    { placeholder: "buscar"; }

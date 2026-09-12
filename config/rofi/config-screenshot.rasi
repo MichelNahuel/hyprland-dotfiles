@@ -1,0 +1,20 @@
+/* -----------------------------------------------------
+ * Menú de capturas de pantalla (lo invoca hypr/scripts/screenshot.sh).
+ * Mismo aspecto que el lanzador: estilo.rasi.
+ * El original de ML4W metía el wallpaper desenfocado como fondo
+ * del panel, que con una pintura detrás queda embarrado.
+ * ----------------------------------------------------- */
+
+configuration {
+    font:            "JetBrainsMono Nerd Font Propo 10";
+    show-icons:      false;
+    hover-select:    false;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+}
+
+@theme "~/.config/rofi/colors.rasi"
+@import "~/.config/rofi/estilo.rasi"
+
+/* el script pasa -width 30, que es porcentaje: lo fijamos acá en píxeles */
+window { width: 420px; }
