@@ -248,6 +248,17 @@ Después de editar: `Super + Shift + B` recarga Waybar, `swaync-client -rs` reca
 - El prompt y la bienvenida se cargan desde `~/.config/bashrc/custom/`, el mecanismo que ML4W
   reserva para reemplazar sus propios archivos.
 
+## Licencia
+
+**GPL-3.0.** El texto completo está en [LICENSE](LICENSE).
+
+Podés usar, modificar y redistribuir esta configuración libremente. La única condición es que,
+si distribuís una versión modificada, la publiques bajo la misma licencia y con el código
+disponible.
+
+Es la licencia que corresponde: este repositorio contiene archivos derivados de ML4W Dotfiles,
+que es GPL-3.0, y la GPL es copyleft — los trabajos derivados mantienen la licencia.
+
 ## Créditos
 
 Basado en [ML4W Dotfiles](https://github.com/mylinuxforwork/dotfiles) de Stephan Raabe (GPL-3.0).
