@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Dibuja "N · M ·" centrado en la terminal, con los puntos girando.
+# Dibuja "N · M ·" centrado en la terminal, con los puntos girando,
+# y la bandera argentina flameando pegada al margen derecho.
 #
 # fastfetch imprime las especificaciones pegadas a la izquierda (sin logo) y este
 # script coloca las cuatro imágenes con kitten icat. Cada imagen es una animación
@@ -25,6 +26,10 @@ PUNTO_FILAS=2      # alto del punto
 HUECO=1            # separación entre piezas
 FILA_LETRAS=1      # misma altura que el bloque de fastfetch
 DATOS_COLS=46      # ancho de las especificaciones + margen
+BANDERA_COLS=20    # ancho de la bandera
+BANDERA_FILAS=10   # alto de la bandera, igual al de las letras
+MARGEN_DER=2       # aire entre la bandera y el borde derecho
+AIRE=3             # separación mínima entre el bloque centrado y la bandera
 
 BLOQUE=$(( LETRA_COLS + HUECO + PUNTO_COLS + HUECO + LETRA_COLS + HUECO + PUNTO_COLS ))
 # el piso del salto queda a la altura del ▔ de las letras (arriba de la última fila)
@@ -34,6 +39,7 @@ FONDO=$(( FILA_LETRAS + LETRA_FILAS + 4 ))    # hasta dónde se considera "panta
 for img in logo-n.png punto.png logo-m.png; do
     [ -f "$CACHE/$img" ] || exit 0
 done
+# la bandera es opcional: si falta, el resto se dibuja igual
 [ -n "$KITTY_WINDOW_ID" ] || exit 0
 command -v kitten >/dev/null 2>&1 || exit 0
 
@@ -66,6 +72,13 @@ col=$(( col + PUNTO_COLS + HUECO ))
 colocar logo-m.png "$col" "$FILA_LETRAS" "$LETRA_COLS" "$LETRA_FILAS"
 col=$(( col + LETRA_COLS + HUECO ))
 colocar punto.png "$col" "$FILA_PUNTOS" "$PUNTO_COLS" "$PUNTO_FILAS"
+
+# La bandera, pegada a la derecha. Solo si entra sin acercarse al bloque centrado:
+# en una terminal angosta se omite en vez de encimarse.
+COL_BANDERA=$(( COLUMNAS - BANDERA_COLS - MARGEN_DER ))
+if [ -f "$CACHE/bandera.png" ] && [ "$COL_BANDERA" -ge $(( INICIO + BLOQUE + AIRE )) ]; then
+    colocar bandera.png "$COL_BANDERA" "$FILA_LETRAS" "$BANDERA_COLS" "$BANDERA_FILAS"
+fi
 
 if [ -n "$fila" ] && [ -n "$columna" ]; then
     printf '\e[%s;%sH' "$fila" "$columna"

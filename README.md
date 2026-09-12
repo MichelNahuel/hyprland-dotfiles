@@ -23,13 +23,15 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Pantalla de bloqueo** (hyprlock) | Borde de la foto, hora, usuario y campo de contraseña en crema `#e6dfcf` translúcido. |
 | **Terminal** (kitty) | Tipografía chica (7), más aire alrededor del texto (18) y cursor en barra fina. |
 | **Prompt** (oh-my-posh) | Dos líneas con marco fino: `┌─ ruta ── rama` y `└─›`, con la flecha en rojo si el comando falló. |
-| **Bienvenida** (fastfetch) | Especificaciones pegadas a la izquierda y, centrado, el bloque animado `N ▪ M ▪`. |
+| **Bienvenida** (fastfetch) | Especificaciones pegadas a la izquierda, el bloque animado `N ▪ M ▪` centrado y una bandera argentina flameando a la derecha. |
 | **Wallpaper** | Una pintura al azar en cada arranque, aplicada por ML4W (sin carreras ni `sleep`). |
 
 ### El bloque animado de la consola
 
 Al abrir la terminal, fastfetch imprime las especificaciones a la izquierda (sin logo) y
-`config/fastfetch/centrado.sh` coloca, centrado, el bloque `N ▪ M ▪`.
+`config/fastfetch/centrado.sh` coloca, centrado, el bloque `N ▪ M ▪` y, pegada al margen
+derecho, una bandera argentina flameando. La bandera solo se dibuja si entra sin acercarse
+al bloque centrado: en una terminal angosta se omite en vez de encimarse.
 
 Las letras son de "andamio", dibujadas con `| / \ _ ▔`:
 
@@ -77,6 +79,20 @@ redibuja, para no pintar sobre tu trabajo. Como cualquier imagen del terminal, d
 > El mismo script deja una versión quieta y blanca de la N en `~/.config/waybar/assets/logo-n.png`,
 > por si se la quiere usar como logo de la barra. No viene activada: a 34 px de alto el andamio se
 > agrisa y se pierde, así que en la barra va la marca `N.M.` como texto. El CSS tiene anotado cómo cambiarlo.
+
+La bandera está hecha con caracteres, como el resto de la consola: caracteres de línea
+para la tela (`═` en las franjas celestes, `─` en la blanca) y, para el Sol de Mayo, los
+mismos trazos que arman la N y la M:
+
+```
+\|/
+-O-
+/|\
+```
+
+Cada columna sube y baja siguiendo una onda viajera —que es como ondula una tela— y las
+crestas se dibujan más claras, lo que da volumen. Sus colores son los de la bandera y no
+los toca matugen.
 
 ## Requisitos
 
@@ -177,6 +193,8 @@ bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
 | Velocidad y tamaño de las letras | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la letra entera), `COLS`, `FILAS` |
 | Giro y tamaño del punto | `fastfetch/logo-n.py` → `CICLO_PUNTO`, `PUNTO_MS`, `PUNTO_LADO` y `PIE_PUNTO` (margen al pie que alinea el piso del salto) |
 | Posición y separación del bloque | `fastfetch/centrado.sh` → `PUNTO_COLS`, `PUNTO_FILAS`, `HUECO`, `FILA_LETRAS` |
+| Ondulación y sol de la bandera | `fastfetch/logo-n.py` → `BANDERA_AMP` (amplitud), `BANDERA_LARGO` (largo de onda), `BANDERA_MS`, `SOL_ARTE`, `TELA_CELESTE` / `TELA_BLANCA` |
+| Posición de la bandera | `fastfetch/centrado.sh` → `BANDERA_COLS`, `BANDERA_FILAS`, `MARGEN_DER`, `AIRE` |
 | LED encendido al mutear (al revés) | `hypr/scripts/mic-led.sh` → intercambiar `valor=0` / `valor=1` |
 | Colores de la pantalla de bloqueo | `hypr/hyprlock.conf` → `rgba(e6dfcf..)` |
 

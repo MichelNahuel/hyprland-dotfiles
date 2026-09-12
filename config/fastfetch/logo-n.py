@@ -43,6 +43,7 @@ Uso: python3 logo-n.py [--salida RUTA] [--salida-m RUTA] [--salida-punto RUTA]
 """
 
 import argparse
+import math
 import os
 import re
 import subprocess
@@ -56,6 +57,7 @@ COLORES_KITTY = os.path.join(HOME, ".config/kitty/colors-matugen.conf")
 SALIDA = os.path.join(HOME, ".cache/fastfetch/logo-n.png")
 SALIDA_M = os.path.join(HOME, ".cache/fastfetch/logo-m.png")
 SALIDA_PUNTO = os.path.join(HOME, ".cache/fastfetch/punto.png")
+SALIDA_BANDERA = os.path.join(HOME, ".cache/fastfetch/bandera.png")
 
 # Celda de texto de kitty: 8 x 19 px con font_size 7 (se usa el doble por nitidez).
 # Si cambia font_size, hay que rehacer estos valores: la imagen debe tener la misma
@@ -82,6 +84,23 @@ PUNTO_MS = 180                  # ritmo propio, independiente del de las letras
 CICLO_RIEL = ("|", "/", "-", "\\")
 CICLO_TAPA_ALTA = ("_", "-", "_", "-")
 CICLO_TAPA_BAJA = ("▔", "-", "▔", "-")
+
+# La bandera argentina, a la derecha del todo. Hecha con caracteres como el resto
+# de la consola: caracteres de línea para la tela y, para el sol, los mismos
+# trazos que arman la N y la M (\ | / -), de modo que hable el mismo idioma.
+# Los colores son los de la bandera: no los toca matugen.
+BANDERA_COLS, BANDERA_FILAS = 20, 10
+BANDERA_CELESTE = (116, 172, 223)
+BANDERA_BLANCO = (240, 244, 248)
+BANDERA_SOL = (246, 180, 14)
+TELA_CELESTE, TELA_BLANCA = "═", "─"
+SOL_ARTE = ("\\|/",
+            "-O-",
+            "/|\\")
+SOL_FILA = 3
+BANDERA_CUADROS, BANDERA_MS = 14, 95
+BANDERA_AMP = 0.42              # amplitud de la onda, en alto de celda
+BANDERA_LARGO = 0.85            # largo de onda, en ancho de la bandera
 
 
 def ciclo_barra(base):
@@ -260,6 +279,40 @@ def cuadros_punto(cuerpo, ruta_tipografia):
     return salida
 
 
+def cuadros_bandera(fuente, cw, chh):
+    """La bandera flameando: cada columna sube y baja siguiendo una onda viajera.
+
+    La onda desplaza la columna entera, que es como ondula una tela de verdad, y
+    el sombreado (más claro en las crestas) le da volumen. El sol viaja con la
+    tela porque su desplazamiento sale de la misma onda que el resto.
+    """
+    PIE = 16                                   # mismo margen al pie que las letras
+    amp, largo = chh * BANDERA_AMP, BANDERA_COLS * BANDERA_LARGO
+    sol_col = (BANDERA_COLS - 3) // 2
+    salida = []
+    for k in range(BANDERA_CUADROS):
+        fase = 2 * math.pi * k / BANDERA_CUADROS
+        im = Image.new("RGBA", (BANDERA_COLS * cw, BANDERA_FILAS * chh + PIE), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        for c in range(BANDERA_COLS):
+            ang = 2 * math.pi * (c / largo) + fase
+            desp = amp * math.sin(ang)
+            luz = 1 + 0.16 * math.cos(ang)
+            for r in range(BANDERA_FILAS):
+                if r < 3 or r >= BANDERA_FILAS - 3:
+                    color, ch = BANDERA_CELESTE, TELA_CELESTE
+                else:
+                    color, ch = BANDERA_BLANCO, TELA_BLANCA
+                sr, sc = r - SOL_FILA, c - sol_col
+                if 0 <= sr < 3 and 0 <= sc < 3:
+                    ch, color = SOL_ARTE[sr][sc], BANDERA_SOL
+                tinta = tuple(max(0, min(255, round(v * luz))) for v in color)
+                d.text(((c + .5) * cw, (r + .5) * chh + desp), ch, font=fuente,
+                       fill=tinta + (255,), anchor="mm")
+        salida.append(im)
+    return salida
+
+
 def a_paleta(im):
     """RGBA -> cuadro GIF con un índice reservado para la transparencia."""
     alpha = im.getchannel("A")
@@ -281,6 +334,8 @@ def main():
     ap.add_argument("--salida", default=SALIDA, help="APNG de la N")
     ap.add_argument("--salida-m", default=SALIDA_M, help="APNG de la M")
     ap.add_argument("--salida-punto", default=SALIDA_PUNTO, help="APNG del punto que gira")
+    ap.add_argument("--salida-bandera", default=SALIDA_BANDERA,
+                    help="APNG de la bandera argentina flameando")
     ap.add_argument("--ancho-celda", type=int, default=ANCHO_CELDA)
     ap.add_argument("--alto-celda", type=int, default=ALTO_CELDA)
     ap.add_argument("--gif", action="store_true",
@@ -312,6 +367,12 @@ def main():
         escribir_apng(args.salida_punto, puntos, [PUNTO_MS] * len(puntos), disposal=2)
         print(f"{args.salida_punto}: APNG punto, {len(puntos)} cuadros de {PUNTO_MS}ms, "
               f"{PUNTO_LADO}x{PUNTO_LADO}px (ritmo propio)")
+
+    if args.salida_bandera:
+        banderas = cuadros_bandera(fuente, args.ancho_celda, args.alto_celda)
+        escribir_apng(args.salida_bandera, banderas, [BANDERA_MS] * len(banderas), disposal=2)
+        print(f"{args.salida_bandera}: APNG bandera, {len(banderas)} cuadros de {BANDERA_MS}ms, "
+              f"{banderas[0].width}x{banderas[0].height}px ({BANDERA_COLS}x{BANDERA_FILAS} celdas)")
 
     # La N quieta y blanca para la barra superior (Waybar no anima imágenes en CSS).
     COLOR_BARRA = "#ffffff"

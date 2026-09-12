@@ -64,7 +64,7 @@ chmod +x "$CONFIG/waybar/scripts/fecha.sh" "$CONFIG/hypr/scripts/mic-led.sh" \
 # restaurar.sh la borre al deshacer la instalación.
 [ -e "$CONFIG/waybar/assets/logo-n.png" ] || echo "waybar/assets/logo-n.png" >> "$BACKUP/nuevos.txt"
 if python3 -c "import PIL" 2>/dev/null; then
-    python3 "$CONFIG/fastfetch/logo-n.py" >/dev/null && info "N, M y punto generados en ~/.cache/fastfetch/"
+    python3 "$CONFIG/fastfetch/logo-n.py" >/dev/null && info "N, M, punto y bandera generados en ~/.cache/fastfetch/"
 else
     aviso "Falta python-pillow: no se pudieron generar las piezas animadas (sudo pacman -S python-pillow)."
 fi
@@ -102,7 +102,8 @@ done < "$B/nuevos.txt"
 
 # Archivos generados fuera de la configuración
 rm -f "$HOME/.cache/fastfetch/logo-n.png" "$HOME/.cache/fastfetch/logo-m.png" \
-      "$HOME/.cache/fastfetch/punto.png" "$HOME/.cache/fastfetch/logo-n-colores"
+      "$HOME/.cache/fastfetch/punto.png" "$HOME/.cache/fastfetch/bandera.png" \
+      "$HOME/.cache/fastfetch/logo-n-colores"
 rmdir "$HOME/.cache/fastfetch" 2>/dev/null
 
 if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
