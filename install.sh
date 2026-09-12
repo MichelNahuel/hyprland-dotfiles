@@ -58,7 +58,10 @@ done < <(find . -type f -print0 | sort -z)
 
 chmod +x "$CONFIG/waybar/scripts/fecha.sh" "$CONFIG/hypr/scripts/mic-led.sh"
 
-# Logo animado de la consola
+# Logo animado de la consola. El generador deja también una N quieta en
+# waybar/assets/: si no existía, se anota como archivo nuevo para que
+# restaurar.sh la borre al deshacer la instalación.
+[ -e "$CONFIG/waybar/assets/logo-n.png" ] || echo "waybar/assets/logo-n.png" >> "$BACKUP/nuevos.txt"
 if python3 -c "import PIL" 2>/dev/null; then
     python3 "$CONFIG/fastfetch/logo-n.py" >/dev/null && info "N animada generada en ~/.cache/fastfetch/logo-n.png"
 else
@@ -95,6 +98,10 @@ done
 while IFS= read -r rel; do
     [ -n "$rel" ] && rm -f "$CONFIG/$rel" && echo "eliminado: $rel"
 done < "$B/nuevos.txt"
+
+# Archivos generados fuera de la configuración
+rm -f "$HOME/.cache/fastfetch/logo-n.png" "$HOME/.cache/fastfetch/logo-n-colores"
+rmdir "$HOME/.cache/fastfetch" 2>/dev/null
 
 if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
     hyprctl reload >/dev/null

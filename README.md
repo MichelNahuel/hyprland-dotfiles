@@ -12,7 +12,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 
 | Componente | Cambio |
 |---|---|
-| **Barra superior** (Waybar, tema `ml4w-transparent-centered`) | Pegada al borde, plana, translúcida (12%) con blur, línea inferior fina, 34 px de alto. |
+| **Barra superior** (Waybar, tema `ml4w-transparent-centered`) | Pegada al borde, plana, translúcida (12%) con blur, línea inferior fina, 34 px de alto. El logo de ML4W se reemplaza por la marca `N.M.` en JetBrainsMono. |
 | **Fecha** | `Vie 11/09 16:27` a la izquierda, con el día en español (`Lun Mar Mie Jue Vie Sab Dom`) sin depender de locales instalados. Clic abre el calendario. |
 | **Íconos de la barra** | Glifos Material Design de contorno de **JetBrainsMono Nerd Font** (volumen, wifi, batería, campana, etc.). Sin quicklinks. |
 | **Micrófono** | Ícono de micrófono tachado en la barra cuando está muteado. |
@@ -28,27 +28,43 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 
 ### La N animada
 
-El logo de fastfetch es una N de "andamio" dibujada con `| / \ _ ▔`, que se invierte
-fila por fila de abajo hacia arriba: cada `|/|` pasa a `|\|` y la diagonal cambia de sentido,
-de modo que la letra queda espejada (se lee como И) y la onda siguiente la devuelve a N.
+El logo de fastfetch es una N de "andamio" dibujada con `| / \ _ ▔`:
 
 ```
-_____        ___          _____        ___
-|/|\\\       |/|          |\|///       |\|
-|\| \\\      |\|          |/| ///      |/|
-|/|  \\\     |/|          |\|  ///     |\|
-|\|   \\\    |\|          |/|   ///    |/|
-|/|    \\\   |/|          |\|    ///   |\|
-|\|     \\\  |\|          |/|     ///  |/|
-|/|      \\\ |/|          |\|      /// |\|
-|\|       \\\|\|          |/|       ///|/|
-▔▔▔        ▔▔▔▔▔          ▔▔▔        ▔▔▔▔▔
+_____        ___
+|/|\\\       |/|
+|\| \\\      |\|
+|/|  \\\     |/|
+|\|   \\\    |\|
+|/|    \\\   |/|
+|\|     \\\  |\|
+|/|      \\\ |/|
+|\|       \\\|\|
+▔▔▔        ▔▔▔▔▔
 ```
+
+La recorren **salvas de cuatro olas** que suben de abajo hacia arriba, una detrás de otra,
+separadas por una fila. Cada ola hace avanzar una fase a la fila que toca, y cada carácter
+sigue el ciclo de su papel original:
+
+```
+rieles      |  ->  /  ->  -  ->  \  ->  |     (vuelta completa en 4 olas)
+andamio     /  ->  \  ->  /  ->  \          (y al revés si nació \)
+diagonal    \  ->  /  ->  \  ->  /
+remates     _  ->  -  ->  _  ->  -          (lo mismo el ▔ de abajo)
+```
+
+Como la salva tiene cuatro olas, al terminar de pasar cada fila volvió exactamente a su lugar
+y la N queda entera. Mientras la banda viaja, el resto de la letra se mantiene legible.
 
 La genera `config/fastfetch/logo-n.py` como **APNG** en `~/.cache/fastfetch/logo-n.png`, y
 kitty la reproduce en bucle sin bloquear el shell (fastfetch la muestra con `--logo-type kitty-icat`,
 disponible desde fastfetch 2.34). Los colores salen de la paleta de matugen, así que la N
 acompaña a la pintura de fondo.
+
+> El mismo script deja una versión quieta y blanca en `~/.config/waybar/assets/logo-n.png`, por si
+> se la quiere usar como logo de la barra. No viene activada: a 34 px de alto el andamio se agrisa
+> y se pierde, así que en la barra va la marca `N.M.` como texto. El CSS tiene anotado cómo cambiarlo.
 
 ## Requisitos
 
@@ -57,7 +73,7 @@ acompaña a la pintura de fondo.
 - Paquetes: `waybar`, `swaync`, `nwg-dock-hyprland`, `hyprlock`, `kitty`, `fastfetch` (≥ 2.34),
   `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar la N).
 - Para el LED de micrófono: una laptop con LED `platform::micmute` (ThinkPad y similares) y `systemd-logind` (viene por defecto).
-- El logo animado **solo funciona en kitty**.
+- La N animada **solo funciona en kitty**.
 
 ## Instalación
 
@@ -137,7 +153,8 @@ bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
 | Qué | Dónde |
 |---|---|
 | Transparencia de la barra | `waybar/themes/ml4w-transparent-centered/default/style-custom.css` → `background: alpha(@surface_container_lowest, 0.12)` |
-| Alto de la barra | mismo archivo → `#workspaces { padding }` y `min-height` |
+| Alto de la barra | mismo archivo → `#workspaces { padding }` y el tamaño de `#custom-ml4w-welcome` |
+| Marca `N.M.` de la barra | `waybar/modules.json` (`custom/ml4w-welcome` → `format`) y el bloque `#custom-ml4w-welcome` del CSS |
 | Formato de la fecha / días con tilde | `waybar/scripts/fecha.sh` → `'%(%w %d/%m %H:%M)T'` y la lista `dias` |
 | Íconos de la barra | `waybar/modules.json` (glifos `md-*` de Nerd Fonts: <https://www.nerdfonts.com/cheat-sheet>) |
 | Transparencia de notificaciones | `swaync/themes/custom/style.css` → `alpha(@surface_container_lowest, 0.05)` |
@@ -145,7 +162,7 @@ bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
 | Tipografía y márgenes de la terminal | `kitty/custom.conf` → `font_size`, `window_padding_width` |
 | Prompt | `ohmyposh/marco.toml` |
 | Datos de la bienvenida | `fastfetch/config.jsonc` |
-| Velocidad y tamaño de la N | `fastfetch/logo-n.py` → `MS_PASO`, `MS_PAUSA`, `COLS`, `FILAS` (si cambiás el tamaño, actualizá `width`/`height` en `fastfetch/config.jsonc`) |
+| Velocidad de la N y tamaño | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la N entera), `COLS`, `FILAS` (si cambiás el tamaño, actualizá `width`/`height` en `fastfetch/config.jsonc`) |
 | LED encendido al mutear (al revés) | `hypr/scripts/mic-led.sh` → intercambiar `valor=0` / `valor=1` |
 | Colores de la pantalla de bloqueo | `hypr/hyprlock.conf` → `rgba(e6dfcf..)` |
 

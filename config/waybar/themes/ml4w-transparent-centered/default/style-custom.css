@@ -29,6 +29,25 @@ window#waybar {
     min-height: 0px;
 }
 
+/* La N en lugar del logo de ML4W. El dibujo de andamio de la consola no se lee a
+   24 px (los trazos caen en 1-2 px y se agrisan), así que en la barra va la letra,
+   en la misma tipografía que la consola.
+   Para usar el dibujo: cambiar font-* por
+       background-image: url("../../../assets/logo-n.png");
+       background-position: center; background-repeat: no-repeat;
+       background-size: contain; padding-right: 34px;
+   El PNG lo genera logo-n.py junto con la animación. */
+#custom-ml4w-welcome {
+    background-image: none;
+    font-family: "JetBrainsMono Nerd Font Propo";
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-left: 2px;
+    padding-right: 6px;
+}
+
 #custom-fecha {
     margin-left: 12px;
     margin-right: 12px;
