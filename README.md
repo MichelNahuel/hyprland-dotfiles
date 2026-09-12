@@ -138,6 +138,15 @@ se desinstala: simplemente deja de estar asignado.
 > más (un `bind` propio, por ejemplo) deja el menú de atajos vacío. Por eso el atajo del
 > lanzador va en `hypr/conf/custom.conf` y ese archivo no se publica.
 
+### Claude Code al iniciar
+
+`hypr/conf/custom.conf` abre Claude Code en el workspace 1 al iniciar sesión. La línea lleva
+una guarda `command -v claude`, así que **si no lo tenés instalado no pasa nada**.
+
+`bash -lc` carga el perfil antes de arrancarlo, y el `exec bash` del final deja una consola
+en su lugar al salir de Claude, en vez de cerrarse la ventana. Para que retome la última
+conversación en vez de empezar una nueva, cambiá `claude` por `claude --continue`.
+
 ### Escala del panel
 
 `hypr/conf/custom.conf` trae `monitor = eDP-1,preferred,auto,1`, que deja el panel interno
