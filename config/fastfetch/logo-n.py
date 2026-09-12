@@ -89,7 +89,7 @@ CICLO_TAPA_BAJA = ("▔", "-", "▔", "-")
 # de la consola: caracteres de línea para la tela y, para el sol, los mismos
 # trazos que arman la N y la M (\ | / -), de modo que hable el mismo idioma.
 # Los colores son los de la bandera: no los toca matugen.
-BANDERA_COLS, BANDERA_FILAS = 20, 10
+BANDERA_COLS, BANDERA_FILAS = 40, 10
 BANDERA_CELESTE = (116, 172, 223)
 BANDERA_BLANCO = (240, 244, 248)
 BANDERA_SOL = (246, 180, 14)
@@ -100,7 +100,8 @@ SOL_ARTE = ("\\|/",
 SOL_FILA = 3
 BANDERA_CUADROS, BANDERA_MS = 14, 95
 BANDERA_AMP = 0.42              # amplitud de la onda, en alto de celda
-BANDERA_LARGO = 0.85            # largo de onda, en ancho de la bandera
+BANDERA_LARGO = 17              # largo de onda, en celdas (absoluto: al ensanchar la
+                                # bandera aparecen más ondas en vez de estirarse)
 
 
 def ciclo_barra(base):
@@ -287,7 +288,7 @@ def cuadros_bandera(fuente, cw, chh):
     tela porque su desplazamiento sale de la misma onda que el resto.
     """
     PIE = 16                                   # mismo margen al pie que las letras
-    amp, largo = chh * BANDERA_AMP, BANDERA_COLS * BANDERA_LARGO
+    amp, largo = chh * BANDERA_AMP, BANDERA_LARGO
     sol_col = (BANDERA_COLS - 3) // 2
     salida = []
     for k in range(BANDERA_CUADROS):

@@ -94,6 +94,9 @@ Cada columna sube y baja siguiendo una onda viajera —que es como ondula una te
 crestas se dibujan más claras, lo que da volumen. Sus colores son los de la bandera y no
 los toca matugen.
 
+Mide 40x10 celdas. Como la celda de kitty es 8x19 px, en pantalla queda de 320x190,
+o sea 1,68:1 — cerca del 1,56:1 de la bandera real.
+
 ## Requisitos
 
 - Arch Linux (o derivada) con **Hyprland ≥ 0.53** (probado en 0.56.2; usa la sintaxis `layerrule = …, match:namespace …`).
@@ -193,7 +196,8 @@ bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
 | Velocidad y tamaño de las letras | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la letra entera), `COLS`, `FILAS` |
 | Giro y tamaño del punto | `fastfetch/logo-n.py` → `CICLO_PUNTO`, `PUNTO_MS`, `PUNTO_LADO` y `PIE_PUNTO` (margen al pie que alinea el piso del salto) |
 | Posición y separación del bloque | `fastfetch/centrado.sh` → `PUNTO_COLS`, `PUNTO_FILAS`, `HUECO`, `FILA_LETRAS` |
-| Ondulación y sol de la bandera | `fastfetch/logo-n.py` → `BANDERA_AMP` (amplitud), `BANDERA_LARGO` (largo de onda), `BANDERA_MS`, `SOL_ARTE`, `TELA_CELESTE` / `TELA_BLANCA` |
+| Tamaño de la bandera | `fastfetch/logo-n.py` → `BANDERA_COLS`, `BANDERA_FILAS` (y el mismo `BANDERA_COLS` en `centrado.sh`) |
+| Ondulación y sol de la bandera | `fastfetch/logo-n.py` → `BANDERA_AMP` (amplitud), `BANDERA_LARGO` (largo de onda **en celdas**: al ensanchar la bandera aparecen más ondas en vez de estirarse), `BANDERA_MS`, `SOL_ARTE`, `TELA_CELESTE` / `TELA_BLANCA` |
 | Posición de la bandera | `fastfetch/centrado.sh` → `BANDERA_COLS`, `BANDERA_FILAS`, `MARGEN_DER`, `AIRE` |
 | LED encendido al mutear (al revés) | `hypr/scripts/mic-led.sh` → intercambiar `valor=0` / `valor=1` |
 | Colores de la pantalla de bloqueo | `hypr/hyprlock.conf` → `rgba(e6dfcf..)` |
