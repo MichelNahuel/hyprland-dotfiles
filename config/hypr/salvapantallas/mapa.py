@@ -24,6 +24,11 @@ CREMA    = (230, 223, 207)      # contorno nacional (el crema de la pantalla de 
 LIMITE   = (128, 122, 110)      # límites entre provincias: más tenues que el contorno
 CELESTE  = (116, 172, 223)      # rótulos del mar (el celeste de la bandera)
 ESCALA_TEXTO = 2               # letras grandes (protocolo de tamaño de texto de kitty)
+
+def ancla(ch):
+    """(escala, texto) de una celda de texto grande. Por defecto ESCALA_TEXTO; con el prefijo
+    "\x1f<n>" la escala es n (el reloj usa letras más grandes que la descripción)."""
+    return (int(ch[1]), ch[2:]) if ch.startswith("\x1f") else (ESCALA_TEXTO, ch)
 TENUE    = 0.80                 # brillo del relleno respecto del color de la provincia
 
 def cargar():
@@ -249,14 +254,16 @@ def png(celdas, ruta, cw=8, ch=19, escala=2, fondo=(14, 16, 20)):
     cw, ch = cw * escala, ch * escala
     img = Image.new("RGB", (len(celdas[0]) * cw, len(celdas) * ch), fondo)
     d = ImageDraw.Draw(img); f = ImageFont.truetype(ruta_fuente(), int(ch * 0.78))
-    grande = ImageFont.truetype(ruta_fuente(), int(ch * 0.78 * ESCALA_TEXTO))
+    grandes = {}
     for y, fila in enumerate(celdas):
         for x, (c, col) in enumerate(fila):
             if not col or c in (" ", ""): continue
-            if len(c) > 1:              # texto grande: cada letra ocupa ESCALA_TEXTO×ESCALA_TEXTO celdas
-                for k, letra in enumerate(c):
-                    d.text(((x + k * ESCALA_TEXTO) * cw + cw * ESCALA_TEXTO / 2, y * ch + ch * ESCALA_TEXTO / 2),
-                           letra, font=grande, fill=col, anchor="mm")
+            if len(c) > 1:              # texto grande: cada letra ocupa E×E celdas
+                E, texto = ancla(c)
+                if E not in grandes: grandes[E] = ImageFont.truetype(ruta_fuente(), int(ch * 0.78 * E))
+                for k, letra in enumerate(texto):
+                    d.text(((x + k * E) * cw + cw * E / 2, y * ch + ch * E / 2),
+                           letra, font=grandes[E], fill=col, anchor="mm")
             else:
                 d.text((x * cw + cw / 2, y * ch + ch / 2), c, font=f, fill=col, anchor="mm")
     img.save(ruta)

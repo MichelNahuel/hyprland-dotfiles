@@ -179,6 +179,17 @@ Para volver al valor por defecto, borrá esa línea.
      Fuego) todo **se desvanece al azar** hasta no quedar ningún carácter.
 3. **Bloquea** la sesión y, un minuto después, **apaga la pantalla** (se vuelve a prender con cualquier tecla).
 
+Mientras un personaje está quieto, su provincia "late" con las mismas salvas de olas que la N, y el
+cambio de provincia acompaña al barrido del retrato. Arriba a la derecha hay un **reloj** hecho con los
+mismos caracteres de andamio, con los dos puntos girando.
+
+**Días especiales** (`hypr/salvapantallas/efemerides.json`): si hoy es una fecha de algún personaje
+(nacimiento, muerte, batallas, fundaciones; para el pingüino, días de Tierra del Fuego, la Antártida,
+Malvinas y de la naturaleza), ese personaje abre la vuelta con **chispas** alrededor y un cartel
+«HOY» entre el mapa y el retrato. Para probar otra fecha: `SALVA_FECHA=06-20`.
+
+Con la batería al 20% o menos y sin cargador no hay animación: bloquea enseguida.
+
 Si se toca una tecla o se mueve el mouse antes del bloqueo, se cancela: durante el carrusel, con un
 **ojo que se abre de golpe** (`hypr/despertar/`) sobre la pantalla apenas oscurecida y difuminada.
 

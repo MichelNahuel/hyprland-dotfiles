@@ -6,6 +6,7 @@
 # Si se toca una tecla o se mueve el mouse, se cancela con la animación del ojo que se abre.
 
 APAGAR_TRAS=60                                   # segundos entre el bloqueo y apagar la pantalla
+BATERIA_MINIMA=20                                # con esta carga o menos, sin cargador: bloquea sin animación
 HYPR="$HOME/.config/hypr"
 ESTADO="${XDG_RUNTIME_DIR:-/tmp}/salvapantallas"
 CLASE="salvapantallas"
@@ -19,6 +20,9 @@ detener() {
 
 case "${1:-}" in
     detener) detener; exit 0 ;;
+    actividad)                                   # hypridle avisa que volvió la actividad
+        [ -d "$ESTADO" ] && [ ! -s "$ESTADO/resultado" ] && echo actividad > "$ESTADO/resultado"
+        exit 0 ;;
     _correr) ;;                                  # uso interno (proceso separado de hypridle/quickshell)
     *)
         pidof hyprlock >/dev/null && exit 0      # ya bloqueada
@@ -39,6 +43,26 @@ despertar() {                                    # ojo que se abre de golpe, tap
     dormir 0.12
 }
 
+bloquear_y_apagar() {                            # bloquea y, al rato, apaga la pantalla si sigue bloqueada
+    ${SALVA_BLOQUEO:-loginctl lock-session}
+    for _ in $(seq 1 50); do pidof hyprlock >/dev/null && break; dormir 0.1; done
+    dormir 1
+    [ -n "${KITTY:-}" ] && kill $KITTY 2>/dev/null
+    rm -rf "$ESTADO"
+    dormir $APAGAR_TRAS
+    pidof hyprlock >/dev/null && { anotar "pantalla apagada"; hyprctl dispatch dpms off; }
+    exit 0
+}
+
+# 0) batería baja y sin cargador: nada de animación, se bloquea enseguida para ahorrar
+for bat in "${SALVA_BATERIAS:-/sys/class/power_supply}"/BAT*; do      # SALVA_BATERIAS: para pruebas
+    [ -r "$bat/capacity" ] || continue
+    if [ "$(cat "$bat/status")" = "Discharging" ] && [ "$(cat "$bat/capacity")" -le "$BATERIA_MINIMA" ]; then
+        anotar "batería baja ($(cat "$bat/capacity")%): bloqueo directo"
+        bloquear_y_apagar
+    fi
+done
+
 # 1) parpadeo: si se interrumpe (tecla o mouse), la capa se cierra sola antes de tiempo
 qs kill -p "$HYPR/parpadeo" >/dev/null 2>&1
 qs -p "$HYPR/parpadeo" >/dev/null 2>&1 &
@@ -46,6 +70,9 @@ PARPADEO=$!
 for _ in $(seq 1 58); do
     dormir 0.1
     kill -0 $PARPADEO 2>/dev/null || { anotar "parpadeo interrumpido"; rm -rf "$ESTADO"; exit 0; }
+    if [ -s "$ESTADO/resultado" ]; then          # actividad avisada por hypridle
+        anotar "parpadeo interrumpido (hypridle)"; qs kill -p "$HYPR/parpadeo" >/dev/null 2>&1; rm -rf "$ESTADO"; exit 0
+    fi
 done
 
 # 2) con los ojos cerrados, el carrusel arranca detrás del negro
@@ -65,22 +92,22 @@ fi
 anotar "carrusel en pantalla"
 qs kill -p "$HYPR/parpadeo" >/dev/null 2>&1
 
-# 3) esperar a que el carrusel termine la vuelta o que haya actividad
-while kill -0 $KITTY 2>/dev/null && [ ! -s "$ESTADO/resultado" ]; do dormir 0.1; done
+# 3) esperar a que el carrusel termine la vuelta o que haya actividad. También cuenta como
+#    actividad que el carrusel deje de ser la ventana activa (p. ej. un atajo cambió de escritorio)
+while kill -0 $KITTY 2>/dev/null && [ ! -s "$ESTADO/resultado" ]; do
+    dormir 0.25
+    if [ "$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // empty')" != "$CLASE" ]; then
+        dormir 0.5                                # un parpadeo de foco al abrir no cuenta
+        [ "$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // empty')" != "$CLASE" ] &&
+            [ ! -s "$ESTADO/resultado" ] && echo actividad > "$ESTADO/resultado"
+    fi
+done
 RESULTADO=$(cat "$ESTADO/resultado" 2>/dev/null)
 anotar "carrusel terminó: ${RESULTADO:-ventana cerrada}"
 
 if [ "$RESULTADO" = "fin" ]; then
-    # 4) se desvaneció el pingüino: bloquear, y cerrar el carrusel ya tapado por el bloqueo
-    ${SALVA_BLOQUEO:-loginctl lock-session}
-    for _ in $(seq 1 50); do pidof hyprlock >/dev/null && break; dormir 0.1; done
-    dormir 1
-    kill $KITTY 2>/dev/null
-    rm -rf "$ESTADO"
-    # 5) al rato, apagar la pantalla si sigue bloqueada (hypridle la prende con la actividad)
-    dormir $APAGAR_TRAS
-    pidof hyprlock >/dev/null && { anotar "pantalla apagada"; hyprctl dispatch dpms off; }
-    exit 0
+    # 4) se desvaneció el pingüino: bloquear (tapa el carrusel) y al rato apagar la pantalla
+    bloquear_y_apagar
 fi
 
 # actividad (o la ventana se cerró): el ojo se abre de golpe
