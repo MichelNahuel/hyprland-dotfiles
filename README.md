@@ -28,7 +28,8 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Escala del panel** | El monitor interno al 100%: usa la resolución real en vez de escalar al 150%. |
 | **Lanzador** (rofi) | Compacto, translúcido con blur y en JetBrainsMono, sin íconos de colores. Un solo atajo para todo. |
 | **Menú de capturas** | Mismo aspecto que el lanzador, sin el wallpaper desenfocado de fondo. |
-| **Menú de encendido** | Arreglados los íconos, que no se veían: usaban una fuente sin glifos Nerd. |
+| **Menú de encendido** | Arreglados los íconos, que no se veían: usaban una fuente sin glifos Nerd. La luna ya no suspende: lanza el salvapantallas. |
+| **Salvapantallas** | A los 8 min sin actividad (o con la luna): un ojo que se cierra, un mapa de Argentina en ASCII y un carrusel de 24 próceres, uno por provincia; al terminar la vuelta se bloquea y luego se apaga la pantalla. |
 
 ### El bloque animado de la consola
 
@@ -159,12 +160,46 @@ con la celda más chica se ven incluso más nítidos.
 Si tu panel interno no se llama `eDP-1` (miralo con `hyprctl monitors`), cambiá el nombre.
 Para volver al valor por defecto, borrá esa línea.
 
+### El salvapantallas
+
+![Salvapantallas](capturas/salvapantallas.png)
+
+`hypr/scripts/salvapantallas.sh` lo lanzan **hypridle** (8 minutos sin actividad) y el botón de la
+**luna** del menú de encendido. Hace, en orden:
+
+1. **Parpadeo** (`hypr/parpadeo/`, Quickshell): una capa negra con una abertura elíptica que se
+   entrecierra, se resiste y se cierra, como un ojo que se duerme.
+2. Con los ojos cerrados abre kitty a pantalla completa con `hypr/salvapantallas/carrusel.py --una-vuelta`:
+   - a la izquierda, un **mapa político de Argentina** dibujado con `| / \ _` y la provincia del
+     personaje iluminada;
+   - a la derecha, el **retrato ASCII** del personaje con nombre, apodo, años, provincia y una
+     descripción en letra doble (protocolo de tamaño de texto de kitty);
+   - al empezar, la imagen se **arma con caracteres que aparecen al azar**; entre personajes pasa el
+     mismo **barrido de olas** de la N de la consola; al final de la vuelta (el pingüino de Tierra del
+     Fuego) todo **se desvanece al azar** hasta no quedar ningún carácter.
+3. **Bloquea** la sesión y, un minuto después, **apaga la pantalla** (se vuelve a prender con cualquier tecla).
+
+Si se toca una tecla o se mueve el mouse antes del bloqueo, se cancela: durante el carrusel, con un
+**ojo que se abre de golpe** (`hypr/despertar/`) sobre la pantalla apenas oscurecida y difuminada.
+
+Los personajes están en `hypr/salvapantallas/proceres.json` (texto) y `dibujos.json` (imagen, recorte
+y ajustes del dibujo de cada uno). La primera vez que corre calcula los retratos para el tamaño de la
+terminal y los guarda en `~/.cache/salvapantallas/`. Las imágenes vienen de Wikimedia Commons, cada
+una con su licencia: ver [CREDITOS.md](config/hypr/salvapantallas/CREDITOS.md). Registro de cada
+ejecución: `~/.cache/salvapantallas/registro.log`.
+
+Para verlo sin esperar: `~/.config/hypr/scripts/salvapantallas.sh` (una vuelta corta y sin bloquear:
+`SALVA_PERSONAJES=1 SALVA_BLOQUEO=true ~/.config/hypr/scripts/salvapantallas.sh`). Un video de la
+vuelta completa: `python3 ~/.config/hypr/salvapantallas/carrusel.py --video vuelta.mp4 --segundos 320`.
+
 ## Requisitos
 
 - Arch Linux (o derivada) con **Hyprland ≥ 0.53** (probado en 0.56.2; usa la sintaxis `layerrule = …, match:namespace …`).
 - **ML4W Dotfiles** instalados (versión *stable*), con el tema de Waybar `ml4w-transparent-centered`.
 - Paquetes: `waybar`, `swaync`, `nwg-dock-hyprland`, `hyprlock`, `kitty`, `fastfetch`,
   `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar las piezas).
+- Para el salvapantallas: `hypridle`, `quickshell`, `jq`, `python-numpy`, `python-scipy` (y `ffmpeg` solo para exportar video).
+  El texto en letra doble necesita **kitty ≥ 0.40**.
 - Para el LED de micrófono: una laptop con LED `platform::micmute` (ThinkPad y similares) y `systemd-logind` (viene por defecto).
 - El bloque animado **solo funciona en kitty**.
 
@@ -263,6 +298,8 @@ bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
 | Posición de la bandera | `fastfetch/centrado.sh` → `BANDERA_COLS`, `BANDERA_FILAS`, `MARGEN_DER`, `AIRE` |
 | LED encendido al mutear (al revés) | `hypr/scripts/mic-led.sh` → intercambiar `valor=0` / `valor=1` |
 | Colores de la pantalla de bloqueo | `hypr/hyprlock.conf` → `rgba(e6dfcf..)` |
+| Salvapantallas: tiempos | `hypr/hypridle.conf` → `timeout = 480`; `hypr/salvapantallas/carrusel.py` → `SEG_QUIETO`, `MS_PASO`, `PASOS_APARICION`; `hypr/scripts/salvapantallas.sh` → `APAGAR_TRAS` |
+| Salvapantallas: personajes | `hypr/salvapantallas/proceres.json` y `dibujos.json` (imagen en `imagenes/`) |
 
 Después de editar: `Super + Shift + B` recarga Waybar, `swaync-client -rs` recarga las notificaciones,
 `hyprctl reload` recarga Hyprland y `pkill -USR1 -x kitty` recarga la terminal.
@@ -292,3 +329,4 @@ que es GPL-3.0, y la GPL es copyleft — los trabajos derivados mantienen la lic
 
 Basado en [ML4W Dotfiles](https://github.com/mylinuxforwork/dotfiles) de Stephan Raabe (GPL-3.0).
 Los archivos de `config/` derivados de ML4W mantienen esa licencia.
+Imágenes y datos del mapa del salvapantallas: ver [CREDITOS.md](config/hypr/salvapantallas/CREDITOS.md) (no están bajo GPL-3.0).

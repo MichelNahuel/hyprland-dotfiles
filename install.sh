@@ -57,7 +57,14 @@ while IFS= read -r -d '' f; do
 done < <(find . -type f -print0 | sort -z)
 
 chmod +x "$CONFIG/waybar/scripts/fecha.sh" "$CONFIG/hypr/scripts/mic-led.sh" \
-         "$CONFIG/fastfetch/centrado.sh"
+         "$CONFIG/fastfetch/centrado.sh" "$CONFIG/hypr/scripts/salvapantallas.sh" \
+         "$CONFIG/hypr/scripts/parpadeo.sh"
+
+# Salvapantallas: el carrusel necesita numpy, scipy y pillow; el script, jq
+if ! python3 -c "import numpy, scipy, PIL" 2>/dev/null; then
+    aviso "Faltan módulos de Python para el salvapantallas (sudo pacman -S python-numpy python-scipy python-pillow)."
+fi
+command -v jq >/dev/null || aviso "Falta jq, que usa el salvapantallas (sudo pacman -S jq)."
 
 # Piezas animadas de la consola. El generador deja también una N quieta en
 # waybar/assets/: si no existía, se anota como archivo nuevo para que
@@ -111,7 +118,9 @@ if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
     setsid -f "$CONFIG/waybar/launch.sh" >/dev/null 2>&1 </dev/null
     setsid -f "$CONFIG/nwg-dock-hyprland/launch.sh" >/dev/null 2>&1 </dev/null
     swaync-client -rs >/dev/null 2>&1
+    pkill -x hypridle; setsid -f hypridle >/dev/null 2>&1 </dev/null
 fi
+rm -rf "$HOME/.cache/salvapantallas"
 echo "Listo."
 EOF
 chmod +x "$BACKUP/restaurar.sh"
@@ -124,6 +133,7 @@ if [ "${NO_RELOAD:-0}" != "1" ] && [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; th
     setsid -f "$CONFIG/nwg-dock-hyprland/launch.sh" >/dev/null 2>&1 </dev/null
     swaync-client -rs >/dev/null 2>&1 || true
     pkill -USR1 -x kitty 2>/dev/null
+    pkill -x hypridle; setsid -f hypridle >/dev/null 2>&1 </dev/null     # toma el nuevo hypridle.conf
     detener_led
     setsid -f "$CONFIG/hypr/scripts/mic-led.sh" >/dev/null 2>&1 </dev/null
 else

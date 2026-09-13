@@ -135,7 +135,7 @@ PanelWindow {
             }
 
             PowerButton { iconTxt: ""; cmd: "pidof hyprlock || hyprlock" }
-            PowerButton { iconTxt: ""; cmd: "systemctl suspend" }
+            PowerButton { iconTxt: ""; cmd: "$HOME/.config/hypr/scripts/salvapantallas.sh" }   // la luna: salvapantallas (antes systemctl suspend)
             PowerButton { iconTxt: ""; cmd: "hyprctl dispatch exit" }
             PowerButton { iconTxt: ""; cmd: "systemctl reboot" }
             PowerButton { iconTxt: ""; cmd: "systemctl poweroff" }
