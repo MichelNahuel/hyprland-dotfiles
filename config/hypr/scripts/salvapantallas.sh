@@ -32,6 +32,14 @@ case "${1:-}" in
 esac
 
 mkdir -p "$ESTADO"; echo $$ > "$ESTADO/pid"
+
+# sin notificaciones mientras corre: "no molestar" de swaync, y al terminar vuelve como estaba
+NOTIF_APAGADAS=0
+if [ "$(swaync-client -D 2>/dev/null)" = "false" ]; then
+    swaync-client -dn >/dev/null 2>&1; NOTIF_APAGADAS=1
+fi
+devolver_notificaciones() { [ "$NOTIF_APAGADAS" = 1 ] && swaync-client -df >/dev/null 2>&1; NOTIF_APAGADAS=0; }
+trap devolver_notificaciones EXIT
 REGISTRO="$HOME/.cache/salvapantallas/registro.log"; mkdir -p "${REGISTRO%/*}"
 anotar() { echo "$(date '+%F %T') $*" >> "$REGISTRO"; }
 anotar "inicio"
@@ -49,6 +57,7 @@ bloquear_y_apagar() {                            # bloquea y, al rato, apaga la 
     dormir 1
     [ -n "${KITTY:-}" ] && kill $KITTY 2>/dev/null
     rm -rf "$ESTADO"
+    devolver_notificaciones                      # ya bloqueada: la pantalla de bloqueo las tapa
     dormir $APAGAR_TRAS
     pidof hyprlock >/dev/null && { anotar "pantalla apagada"; hyprctl dispatch dpms off; }
     exit 0
@@ -89,6 +98,11 @@ done
 if ! kill -0 $PARPADEO 2>/dev/null && [ ! -f "$ESTADO/listo" ]; then
     anotar "interrumpido mientras cargaba el carrusel"; kill $KITTY 2>/dev/null; rm -rf "$ESTADO"; exit 0
 fi
+# mostrar el escritorio especial del carrusel (queda arriba de todo, aunque haya algo a pantalla completa)
+[ "$(hyprctl monitors -j | jq -r '.[0].specialWorkspace.name')" = "special:salvapantallas" ] ||
+    hyprctl dispatch togglespecialworkspace salvapantallas >/dev/null
+hyprctl dispatch focuswindow "class:^${CLASE}\$" >/dev/null
+dormir 0.3
 anotar "carrusel en pantalla"
 qs kill -p "$HYPR/parpadeo" >/dev/null 2>&1
 

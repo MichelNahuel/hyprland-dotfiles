@@ -90,7 +90,7 @@ ShellRoot {
         Item {
             anchors.fill: parent
             focus: true
-            Keys.onPressed: Qt.quit()
+            Keys.onPressed: if (ventana.armado) Qt.quit()   // con Super+L la tecla recién soltada no cuenta
         }
     }
 }

@@ -20,14 +20,14 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Dock** (nwg-dock-hyprland) | Tema `custom`: translúcido, esquinas rectas, borde fino, flotante, con blur. |
 | **Notificaciones** (swaync) | Tema `custom`: translúcidas (5%), esquinas rectas, blur que muestra lo que hay detrás (sin xray). |
 | **Cursor** | No salta al centro de la ventana al enfocarla (`cursor:no_warps`). |
-| **Pantalla de bloqueo** (hyprlock) | Borde de la foto, hora, usuario y campo de contraseña en crema `#e6dfcf` translúcido. |
+| **Pantalla de bloqueo** (hyprlock) | Mismo lenguaje que la consola: hora con dígitos de caracteres (`hypr/scripts/reloj-bloqueo.py`), fecha en español, usuario como el prompt, marco y campo rectos de línea fina en crema; el marco se pone dorado con Bloq Mayús. |
 | **Terminal** (kitty) | Tipografía chica (7), más aire alrededor del texto (18) y cursor en barra fina. |
 | **Prompt** (oh-my-posh) | Dos líneas con marco fino: `┌─ ruta ── rama` y `└─›`, con la flecha en rojo si el comando falló. |
 | **Bienvenida** (fastfetch) | Especificaciones pegadas a la izquierda, el bloque animado `N ▪ M ▪` centrado y una bandera argentina flameando a la derecha. |
 | **Wallpaper** | Una pintura al azar en cada arranque, aplicada por ML4W (sin carreras ni `sleep`). |
 | **Escala del panel** | El monitor interno al 100%: usa la resolución real en vez de escalar al 150%. |
 | **Lanzador** (rofi) | Compacto, translúcido con blur y en JetBrainsMono, sin íconos de colores. Un solo atajo para todo. Lo que mejor coincide con lo escrito queda arriba. |
-| **Menú de capturas** | Mismo aspecto que el lanzador, sin el wallpaper desenfocado de fondo. |
+| **Menú de capturas** | Mismo aspecto que el lanzador, sin el wallpaper desenfocado de fondo, y en español (menús y avisos). |
 | **Menú de encendido** | Arreglados los íconos, que no se veían: usaban una fuente sin glifos Nerd. La luna ya no suspende: lanza el salvapantallas. |
 | **Salvapantallas** | A los 8 min sin actividad (o con la luna): un ojo que se cierra, un mapa de Argentina en ASCII y un carrusel de 24 próceres, uno por provincia; al terminar la vuelta se bloquea y luego se apaga la pantalla. |
 
@@ -189,6 +189,8 @@ Malvinas y de la naturaleza), ese personaje abre la vuelta con **chispas** alred
 «HOY» entre el mapa y el retrato. Para probar otra fecha: `SALVA_FECHA=06-20`.
 
 Con la batería al 20% o menos y sin cargador no hay animación: bloquea enseguida.
+
+También se lanza con **Super + L** (Super + Ctrl + L sigue bloqueando directo). Mientras corre no aparecen notificaciones, y se abre en un escritorio especial que queda encima de todo, incluso de un video a pantalla completa.
 
 Si se toca una tecla o se mueve el mouse antes del bloqueo, se cancela: durante el carrusel, con un
 **ojo que se abre de golpe** (`hypr/despertar/`) sobre la pantalla apenas oscurecida y difuminada.
