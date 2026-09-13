@@ -75,10 +75,16 @@ ShellRoot {
         // mover el mouse o apretar una tecla lo cierra: salvapantallas.sh lo nota y cancela todo
         property bool armado: false
         Timer { interval: 1200; running: true; onTriggered: ventana.armado = true }   // margen: al apretar la luna la mano sigue en el mouse
+        // un temblor de la mano no cuenta: hay que mover el mouse de verdad
+        property real x0: -1
+        property real y0: -1
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onPositionChanged: if (ventana.armado) Qt.quit()
+            onPositionChanged: (m) => {
+                if (ventana.x0 < 0 || !ventana.armado) { ventana.x0 = m.x; ventana.y0 = m.y; return }
+                if (Math.hypot(m.x - ventana.x0, m.y - ventana.y0) > 40) Qt.quit()
+            }
             onPressed: Qt.quit()
         }
         Item {

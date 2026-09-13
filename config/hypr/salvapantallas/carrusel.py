@@ -22,6 +22,7 @@ OLAS = 4                    # olas por salva, como en la N
 MS_PASO = 40                # cada paso de la salva sube una fila
 PASOS_APARICION = 100      # la imagen inicial se arma en 100 pasos de MS_PASO (4 s)
 GRACIA_ENTRADA = 1.0         # segundos iniciales en los que se ignora el mouse/teclado
+UMBRAL_MOUSE = 3             # filas (y el doble de columnas) que hay que mover el mouse para salir
 SEG_QUIETO = 9              # tiempo que queda cada personaje
 FILAS_RETRATO = 80
 ANCHO_DESCRIPCION = 90        # letras por renglón de la descripción (en letra grande)
@@ -276,6 +277,19 @@ def terminal(una_vuelta=False):
             while time.time() < limite: time.sleep(0.1)
         restaurar()
     arranque = time.time()
+    origen = []                                  # primera posición del mouse vista
+    def hubo_actividad(datos):
+        """Una tecla cuenta siempre; el mouse, solo si se movió unas celdas (no un temblor)."""
+        import re
+        texto = datos.decode(errors="ignore")
+        reportes = re.findall(r"\x1b\[<(\d+);(\d+);(\d+)[Mm]", texto)
+        if re.sub(r"\x1b\[<\d+;\d+;\d+[Mm]", "", texto): return True        # teclado
+        for boton, x, y in reportes:
+            boton, x, y = int(boton), int(x), int(y)
+            if boton < 32 or boton in (64, 65): return True                       # clic o rueda
+            if not origen: origen.append((x, y)); continue
+            if abs(x - origen[0][0]) > UMBRAL_MOUSE * 2 or abs(y - origen[0][1]) > UMBRAL_MOUSE: return True
+        return False
     def esperar(ms):
         """Duerme `ms` milisegundos, pero corta si llega una tecla o un movimiento del mouse."""
         fin = time.time() + ms / 1000
@@ -285,8 +299,9 @@ def terminal(una_vuelta=False):
             listo, _, _ = select.select([ent], [], [], falta)
             if not listo: return False
             datos = os.read(ent, 4096)
-            if time.time() - arranque > GRACIA_ENTRADA: return True
-            # el primer segundo se descarta: al abrir la ventana llega un movimiento "fantasma"
+            if time.time() - arranque <= GRACIA_ENTRADA:
+                continue                         # al abrir la ventana llega un movimiento "fantasma"
+            if hubo_actividad(datos): return True
     cols, filas = shutil.get_terminal_size()
     previo = None
     def mitad_baja(fila):

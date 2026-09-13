@@ -134,6 +134,8 @@ if [ "${NO_RELOAD:-0}" != "1" ] && [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; th
     swaync-client -rs >/dev/null 2>&1 || true
     pkill -USR1 -x kitty 2>/dev/null
     pkill -x hypridle; setsid -f hypridle >/dev/null 2>&1 </dev/null     # toma el nuevo hypridle.conf
+    # Quickshell no recarga solo el menú de encendido (la luna): se reinicia su instancia principal
+    qs kill -p "$CONFIG/quickshell/shell.qml" >/dev/null 2>&1 && (cd "$HOME" && setsid -f qs >/dev/null 2>&1 </dev/null)
     detener_led
     setsid -f "$CONFIG/hypr/scripts/mic-led.sh" >/dev/null 2>&1 </dev/null
 else
