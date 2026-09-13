@@ -16,6 +16,11 @@ configuration {
     me-select-entry:     "";
     me-accept-entry:     "MousePrimary";
     window-format:       "{c}  ·  {t}";
+    /* lo que mejor coincide con lo escrito queda arriba (antes: historial y orden alfabético),
+       y solo se busca en el nombre: los juegos de Steam coincidían por su comando "steam://…" */
+    sort:                true;
+    sorting-method:      "fzf";
+    drun-match-fields:   "name,generic,keywords";
 }
 
 @theme "~/.config/rofi/colors.rasi"
