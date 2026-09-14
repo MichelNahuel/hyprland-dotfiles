@@ -389,6 +389,21 @@ def anillo_chispas(panel_c, mcols, alto_retrato, oy):
         for x, (ch, _) in enumerate(panel_c[y]):
             if ch not in (" ", ""): silueta[y, x] = True
     silueta = ndimage.binary_fill_holes(silueta)
+    if silueta.any():
+        # cierre convexo: sin esto, una entalladura del contorno (el hueco entre la cabeza y un
+        # brazo levantado, o entre un instrumento y el cuerpo) queda "afuera" de la silueta pero
+        # visualmente adentro de la figura, y ahí podían caer chispas que parecen superpuestas
+        from scipy.spatial import ConvexHull
+        from PIL import Image, ImageDraw
+        ys, xs = np.nonzero(silueta)
+        try:
+            casco = ConvexHull(np.column_stack([xs, ys]))
+            poligono = [(int(xs[i]), int(ys[i])) for i in casco.vertices]
+            img = Image.new("1", (ancho, filas), 0)
+            ImageDraw.Draw(img).polygon(poligono, fill=1)
+            silueta |= np.asarray(img, dtype=bool)
+        except Exception:
+            pass    # menos de 3 puntos o colineales: se queda con la silueta rellena
     dist = ndimage.distance_transform_edt(~silueta, sampling=(1, 0.5))
     anillo = (dist >= 1.5) & (dist <= 4.5)
     anillo[oy + alto_retrato:, :] = False

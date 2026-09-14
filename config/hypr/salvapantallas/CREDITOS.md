@@ -12,7 +12,7 @@ de las CC BY-SA quedan bajo esa misma licencia.
 | Catamarca | Fray Mamerto Esquiú | [Mamerto_Esquiú.jpg](https://commons.wikimedia.org/wiki/File:Mamerto_Esquiú.jpg) | Desconocido | Public domain | — |
 | Chaco | Óscar Alemán | [Oscar-aleman.jpg](https://commons.wikimedia.org/wiki/File:Oscar-aleman.jpg) | Desconocido | Public domain | — |
 | Chubut | Lewis Jones | [Lewis_Jones_(Wladfa).jpg](https://commons.wikimedia.org/wiki/File:Lewis_Jones_(Wladfa).jpg) | Hogyncymru | CC BY-SA 4.0 | — |
-| Corrientes | José de San Martín | [José_de_San_Martín_(retrato,_c.1828).jpg](https://commons.wikimedia.org/wiki/File:José_de_San_Martín_(retrato,_c.1828).jpg) | Atribuido a Jean Baptiste Madou (autor discutido) | Public domain | — |
+| Corrientes | José de San Martín | [José_de_San_Martín_(retrato,_c.1828).jpg](https://commons.wikimedia.org/wiki/File:José_de_San_Martín_(retrato,_c.1828).jpg) | Atribuido a Jean Baptiste Madou (autor discutido) | Public domain | Recorte propio del usuario sobre esta misma pintura (`San_Martín_recorte.jpg`, fondo negro) |
 | Córdoba | José María Paz | [José_María_Paz.jpg](https://commons.wikimedia.org/wiki/File:José_María_Paz.jpg) | Émile Desmaisons (litografía) | Public domain | — |
 | Entre Ríos | Justo José de Urquiza | [Daguerrotipo_de_Justo_José_de_Urquiza_(recorte).jpg](https://commons.wikimedia.org/wiki/File:Daguerrotipo_de_Justo_José_de_Urquiza_(recorte).jpg) | Atribuido a Charles DeForest Fredricks | Public domain | — |
 | Formosa | Luis Jorge Fontana | [Coronel_Luís_Jorge_Fontana_(1879).JPG](https://commons.wikimedia.org/wiki/File:Coronel_Luís_Jorge_Fontana_(1879).JPG) | Desconocido | Public domain | — |
