@@ -143,4 +143,20 @@ else
     aviso "No se recargó nada: los cambios se aplican al reiniciar la sesión."
 fi
 
+# 6. Tema de GRUB (opcional: toca el arranque, así que solo se instala si se contesta que sí)
+#    GRUB_TEMA=si / GRUB_TEMA=no evita la pregunta. Sin terminal interactiva, no se instala.
+RESPUESTA_GRUB="${GRUB_TEMA:-}"
+if [ -z "$RESPUESTA_GRUB" ] && [ -t 0 ] && command -v grub-mkconfig >/dev/null && [ -e /boot/grub/grub.cfg ]; then
+    echo
+    info "Opcional: tema de GRUB N.M. (la pantalla de arranque se corrompe cada segundo; Linux primero, Windows 11 segundo; 10 s)."
+    aviso "Toca el arranque: pide sudo, respalda, verifica antes de aplicar y deja un script para deshacerlo."
+    read -r -p "¿Instalar el tema de GRUB? [s/N] " RESPUESTA_GRUB
+fi
+case "$RESPUESTA_GRUB" in
+    s|S|si|sí|Si|Sí)
+        sudo bash "$REPO/grub/instalar.sh" || aviso "El tema de GRUB no se instaló: el arranque quedó como estaba." ;;
+    *)
+        info "Tema de GRUB: no se instaló. Para instalarlo más adelante: sudo bash $REPO/grub/instalar.sh" ;;
+esac
+
 info "Instalación completa. Para deshacerla: bash $BACKUP/restaurar.sh"

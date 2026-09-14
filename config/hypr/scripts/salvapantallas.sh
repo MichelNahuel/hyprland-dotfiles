@@ -21,7 +21,14 @@ detener() {
 case "${1:-}" in
     detener) detener; exit 0 ;;
     actividad)                                   # hypridle avisa que volvió la actividad
-        [ -d "$ESTADO" ] && [ ! -s "$ESTADO/resultado" ] && echo actividad > "$ESTADO/resultado"
+        # Hyprland cuenta como actividad que aparezca la ventana del carrusel y el cambio al escritorio
+        # especial que hace este mismo script: esos avisos se ignoran. Mientras tanto las teclas y el
+        # mouse los detectan la capa del parpadeo y, después, el carrusel.
+        if [ -f "$ESTADO/ignorar_hypridle_hasta" ] && [ "$(date +%s%N)" -lt "$(cat "$ESTADO/ignorar_hypridle_hasta")" ]; then
+            echo "$(date '+%F %T') aviso de hypridle ignorado (lo causó el propio salvapantallas)" >> "$HOME/.cache/salvapantallas/registro.log"
+            exit 0
+        fi
+        [ -d "$ESTADO" ] && [ ! -s "$ESTADO/resultado" ] && echo "actividad (hypridle)" > "$ESTADO/resultado"
         exit 0 ;;
     _correr) ;;                                  # uso interno (proceso separado de hypridle/quickshell)
     *)
@@ -80,11 +87,12 @@ for _ in $(seq 1 58); do
     dormir 0.1
     kill -0 $PARPADEO 2>/dev/null || { anotar "parpadeo interrumpido"; rm -rf "$ESTADO"; exit 0; }
     if [ -s "$ESTADO/resultado" ]; then          # actividad avisada por hypridle
-        anotar "parpadeo interrumpido (hypridle)"; qs kill -p "$HYPR/parpadeo" >/dev/null 2>&1; rm -rf "$ESTADO"; exit 0
+        anotar "parpadeo interrumpido ($(cat "$ESTADO/resultado"))"; qs kill -p "$HYPR/parpadeo" >/dev/null 2>&1; rm -rf "$ESTADO"; exit 0
     fi
 done
 
 # 2) con los ojos cerrados, el carrusel arranca detrás del negro
+echo 9000000000000000000 > "$ESTADO/ignorar_hypridle_hasta"      # hasta mostrarlo (ver "actividad" arriba)
 SALVA_LISTO="$ESTADO/listo" SALVA_RESULTADO="$ESTADO/resultado" \
     kitty --class "$CLASE" --start-as fullscreen -o confirm_os_window_close=0 \
           -o background_opacity=1 -o background=#0e1014 -o cursor_shape=block \
@@ -102,6 +110,7 @@ fi
 [ "$(hyprctl monitors -j | jq -r '.[0].specialWorkspace.name')" = "special:salvapantallas" ] ||
     hyprctl dispatch togglespecialworkspace salvapantallas >/dev/null
 hyprctl dispatch focuswindow "class:^${CLASE}\$" >/dev/null
+echo $(( $(date +%s%N) + 2000000000 )) > "$ESTADO/ignorar_hypridle_hasta"   # 2 s más, por el cambio de escritorio
 dormir 0.3
 anotar "carrusel en pantalla"
 qs kill -p "$HYPR/parpadeo" >/dev/null 2>&1
@@ -113,7 +122,7 @@ while kill -0 $KITTY 2>/dev/null && [ ! -s "$ESTADO/resultado" ]; do
     if [ "$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // empty')" != "$CLASE" ]; then
         dormir 0.5                                # un parpadeo de foco al abrir no cuenta
         [ "$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // empty')" != "$CLASE" ] &&
-            [ ! -s "$ESTADO/resultado" ] && echo actividad > "$ESTADO/resultado"
+            [ ! -s "$ESTADO/resultado" ] && echo "actividad (otra ventana activa)" > "$ESTADO/resultado"
     fi
 done
 RESULTADO=$(cat "$ESTADO/resultado" 2>/dev/null)

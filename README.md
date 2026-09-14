@@ -29,6 +29,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Lanzador** (rofi) | Compacto, translúcido con blur y en JetBrainsMono, sin íconos de colores. Un solo atajo para todo. Lo que mejor coincide con lo escrito queda arriba. |
 | **Menú de capturas** | Mismo aspecto que el lanzador, sin el wallpaper desenfocado de fondo, y en español (menús y avisos). |
 | **Menú de encendido** | Arreglados los íconos, que no se veían: usaban una fuente sin glifos Nerd. La luna ya no suspende: lanza el salvapantallas. |
+| **Tema de GRUB** (opcional) | La pantalla de arranque "que no deberías ver": pilares ASCII (uno roto), datos del equipo y una corrupción que avanza cada segundo hasta que arranca el sistema. Linux primero, Windows 11 segundo, 10 s. No se instala si no lo pedís. |
 | **Salvapantallas** | A los 8 min sin actividad (o con la luna): un ojo que se cierra, un mapa de Argentina en ASCII y un carrusel de 24 próceres, uno por provincia; al terminar la vuelta se bloquea y luego se apaga la pantalla. |
 
 ### El bloque animado de la consola
@@ -205,6 +206,58 @@ Para verlo sin esperar: `~/.config/hypr/scripts/salvapantallas.sh` (una vuelta c
 `SALVA_PERSONAJES=1 SALVA_BLOQUEO=true ~/.config/hypr/scripts/salvapantallas.sh`). Un video de la
 vuelta completa: `python3 ~/.config/hypr/salvapantallas/carrusel.py --video vuelta.mp4 --segundos 320`.
 
+### Tema de GRUB (opcional)
+
+![Tema de GRUB](capturas/grub.png)
+
+Una pantalla de arranque recargada que parece algo que no deberías estar viendo, para que el
+negro del sistema al arrancar se sienta como un corte:
+
+- **Cada segundo se rompe un poco más**: franjas desgarradas, colores corridos y caracteres basura
+  avanzan mientras corre la cuenta regresiva. GRUB no anima nada por sí solo; lo único que redibuja
+  cada segundo son los componentes con `id="__timeout__"`, y de eso se aprovecha el tema (cada franja
+  es una barra de progreso con una textura corrupta).
+- **Siempre legible**: la corrupción nunca pisa el menú, la cuenta ni la ayuda. Al tocar una tecla la
+  cuenta se frena y la pantalla queda limpia.
+- Pilares ASCII a los costados (el de la derecha, roto), advertencias en rojo, volcados de memoria
+  que cambian cada segundo y **los datos reales del equipo** (placa, CPU, GPU, memoria, discos), que
+  se leen al instalar.
+- **Orden del menú**: Linux primero, **Windows 11** segundo (renombra "Windows Boot Manager"), después
+  las opciones avanzadas. **Cuenta de 10 s**.
+
+**No se instala solo.** `install.sh` pregunta al final (la respuesta por defecto es no), o se instala
+aparte:
+
+```bash
+sudo bash grub/instalar.sh
+```
+
+Como toca el arranque, `grub/instalar.sh` va con cuidado:
+
+1. **No toca la partición EFI ni reinstala GRUB** (no corre `grub-install`).
+2. Respalda `/etc/default/grub` y `/boot/grub/grub.cfg` en `~/backups/grub-tema-<fecha>/`.
+3. Genera un `grub.cfg` de referencia con la configuración original y otro **aparte** con el tema;
+   `grub/verificar.py` los compara entrada por entrada: tienen que ser idénticas salvo el orden y el
+   nombre de Windows, con la misma entrada por defecto. Si algo no coincide o falla un paso, deshace
+   todo y no aplica nada.
+4. Muestra los cambios y **pregunta antes de ponerlo en uso**.
+
+Para el orden, `/etc/grub.d/11_nm_orden` corre `10_linux` y `30_os-prober` (que quedan sin permiso de
+ejecución, sin borrarlos ni editarlos) y reordena lo que generan. Si una actualización de GRUB les
+devuelve el permiso, el menú vuelve al orden de siempre, sin duplicar entradas. Si `GRUB_DEFAULT` es un
+número distinto de 0, no cambia el orden (cambiaría qué sistema arranca solo).
+
+Detalles:
+
+- Pensado para **1920×1200 y 1920×1080** (toma la resolución del panel; se puede forzar con
+  `GRUB_TEMA_RES=1920x1080`). Los componentes de GRUB van en píxeles: a otras resoluciones puede no
+  quedar bien.
+- El tema usa pocos archivos (85) a propósito: GRUB anota en el registro del TPM cada archivo que abre, y
+  en algunas notebooks (ThinkPad) ese registro se llena y aparece al arrancar
+  `EFI stub: WARNING: Failed to measure data for event 1`.
+- Vista previa en video, sin instalar nada: `python3 grub/generar_tema.py preview grub.mp4`.
+- Para deshacerlo: `sudo bash ~/backups/grub-tema-<fecha>/restaurar.sh`.
+
 ## Requisitos
 
 - Arch Linux (o derivada) con **Hyprland ≥ 0.53** (probado en 0.56.2; usa la sintaxis `layerrule = …, match:namespace …`).
@@ -213,6 +266,7 @@ vuelta completa: `python3 ~/.config/hypr/salvapantallas/carrusel.py --video vuel
   `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar las piezas).
 - Para el salvapantallas: `hypridle`, `quickshell`, `jq`, `python-numpy`, `python-scipy` (y `ffmpeg` solo para exportar video).
   El texto en letra doble necesita **kitty ≥ 0.40**.
+- Para el tema de GRUB (opcional): **GRUB 2** en `/boot/grub`, `python-pillow`, `ttf-jetbrains-mono-nerd` y `os-prober` si hay Windows.
 - Para el LED de micrófono: una laptop con LED `platform::micmute` (ThinkPad y similares) y `systemd-logind` (viene por defecto).
 - El bloque animado **solo funciona en kitty**.
 
@@ -232,6 +286,8 @@ bash install.sh
 3. Copia los archivos de `config/` a `~/.config/` (respetando los symlinks de ML4W).
 4. Ajusta las rutas de `hyprlock.conf` a tu `$HOME` y genera las piezas animadas.
 5. Recarga Hyprland, Waybar, el dock, swaync, kitty e inicia el script del LED.
+6. Pregunta si querés instalar el [tema de GRUB](#tema-de-grub-opcional). Por defecto, no
+   (`GRUB_TEMA=no bash install.sh` evita la pregunta).
 
 Todo queda aplicado de forma permanente: al encender la computadora, el autostart de ML4W
 lanza Waybar, el dock y swaync con estos temas, y `hypr/conf/custom.conf` inicia el script del LED.
@@ -288,6 +344,8 @@ y borra los que se agregaron:
 ```bash
 bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
 ```
+
+El tema de GRUB tiene su propio respaldo y script: `sudo bash ~/backups/grub-tema-<fecha>/restaurar.sh`.
 
 ## Personalizar
 

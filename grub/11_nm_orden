@@ -1,0 +1,32 @@
+#! /bin/sh
+set -e
+# Orden del menú de GRUB (tema N.M.): Arch Linux, Windows 11, opciones avanzadas, firmware.
+#
+# Para eso 10_linux y 30_os-prober quedan SIN permiso de ejecución (no se borran ni se editan)
+# y este script los corre y reordena su salida. Las entradas salen idénticas; lo único que
+# cambia es el orden y el nombre visible de "Windows Boot Manager" → "Windows 11".
+#
+# A prueba de actualizaciones: si un paquete le devuelve el permiso de ejecución a alguno de
+# los dos, este script deja de emitir lo suyo y GRUB vuelve al orden de siempre (Arch primero,
+# nunca se duplica ni pasa Windows a ser la opción por defecto).
+
+DIR="${NM_GRUBD:-/etc/grub.d}"
+
+linux=""
+if [ ! -x "$DIR/10_linux" ] && [ -f "$DIR/10_linux" ]; then
+  linux="$(sh "$DIR/10_linux")"
+fi
+windows=""
+if [ ! -x "$DIR/30_os-prober" ] && [ -f "$DIR/30_os-prober" ]; then
+  windows="$(sh "$DIR/30_os-prober")"
+  windows="$(printf '%s\n' "$windows" | sed "s/^menuentry 'Windows Boot Manager (on [^']*)'/menuentry 'Windows 11'/")"
+fi
+
+# 10_linux: la entrada simple va antes de la primera línea "submenu" (sin sangría)
+arch="$(printf '%s\n' "$linux" | sed '/^submenu /,$d')"
+resto="$(printf '%s\n' "$linux" | sed -n '/^submenu /,$p')"
+
+[ -n "$arch" ]    && printf '%s\n' "$arch"
+[ -n "$windows" ] && printf '%s\n' "$windows"
+[ -n "$resto" ]   && printf '%s\n' "$resto"
+exit 0
