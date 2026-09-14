@@ -20,6 +20,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Dock** (nwg-dock-hyprland) | Tema `custom`: translúcido, esquinas rectas, borde fino, flotante, con blur. |
 | **Notificaciones** (swaync) | Tema `custom`: translúcidas (5%), esquinas rectas, blur que muestra lo que hay detrás (sin xray). |
 | **Cursor** | No salta al centro de la ventana al enfocarla (`cursor:no_warps`). |
+| **Touchpad** | Deslizar tres dedos a los costados cambia de escritorio, de a uno y sin saltear los vacíos. |
 | **Pantalla de bloqueo** (hyprlock) | Mismo lenguaje que la consola: hora con dígitos de caracteres (`hypr/scripts/reloj-bloqueo.py`), fecha en español, usuario como el prompt, marco y campo rectos de línea fina en crema; el marco se pone dorado con Bloq Mayús. |
 | **Terminal** (kitty) | Tipografía chica (7), más aire alrededor del texto (18) y cursor en barra fina. |
 | **Prompt** (oh-my-posh) | Dos líneas con marco fino: `┌─ ruta ── rama` y `└─›`, con la flecha en rojo si el comando falló. |
