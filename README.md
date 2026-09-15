@@ -8,6 +8,18 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 
 ![La N animada de la consola](capturas/consola.png)
 
+## Índice
+
+- [Qué incluye](#qué-incluye)
+- [Requisitos](#requisitos)
+- [Instalación](#instalación)
+- [Volver atrás](#volver-atrás)
+- [Personalizar](#personalizar)
+- [Cómo funciona cada cosa](#cómo-funciona-cada-cosa)
+- [Notas](#notas)
+- [Licencia](#licencia)
+- [Créditos](#créditos)
+
 ## Qué incluye
 
 | Componente | Cambio |
@@ -20,7 +32,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Dock** (nwg-dock-hyprland) | Tema `custom`: translúcido, esquinas rectas, borde fino, flotante, con blur. |
 | **Notificaciones** (swaync) | Tema `custom`: translúcidas (5%), esquinas rectas, blur que muestra lo que hay detrás (sin xray). |
 | **Cursor** | No salta al centro de la ventana al enfocarla (`cursor:no_warps`). |
-| **Ventana activa** (opcional) | En vez del sutil cambio de opacidad de siempre, un halo de color alrededor de la ventana con foco (borde en degradé + sombra del mismo color); la que no tiene foco queda sin borde. |
+| **Ventana activa** | En vez del sutil cambio de opacidad de siempre, un halo de color alrededor de la ventana con foco (borde en degradé + sombra del mismo color); la que no tiene foco queda sin borde. |
 | **Touchpad** | Tres dedos a los costados cambia de escritorio (de a uno, sin saltear los vacíos); tres dedos hacia abajo alterna pantalla completa de la ventana activa; tres dedos hacia arriba abre el mismo selector de ventanas/escritorios que `Super+Tab`. |
 | **Selector de fondo de pantalla** (`Super+Ctrl+W`) | Lista por teclado (flechas + Enter) en vez del selector de Quickshell, que exige mouse. |
 | **Pantalla de bloqueo** (hyprlock) | Mismo lenguaje que la consola: hora con dígitos de caracteres (`hypr/scripts/reloj-bloqueo.py`), fecha en español, usuario como el prompt, marco y campo rectos de línea fina en crema; el marco se pone dorado con Bloq Mayús. |
@@ -34,6 +46,117 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Menú de encendido** | Arreglados los íconos, que no se veían: usaban una fuente sin glifos Nerd. La luna ya no suspende: lanza el salvapantallas. |
 | **Tema de GRUB** (opcional) | La pantalla de arranque "que no deberías ver": pilares ASCII (uno roto), datos del equipo y una corrupción que avanza cada segundo hasta que arranca el sistema. Linux primero, Windows 11 segundo, 10 s. No se instala si no lo pedís. |
 | **Salvapantallas** | A los 8 min sin actividad (o con la luna): un ojo que se cierra, un mapa de Argentina en ASCII y un carrusel de 24 próceres, uno por provincia; al terminar la vuelta se bloquea y luego se apaga la pantalla. |
+
+## Requisitos
+
+- Arch Linux (o derivada) con **Hyprland ≥ 0.53** (probado en 0.56.2; usa la sintaxis `layerrule = …, match:namespace …`).
+- **ML4W Dotfiles** instalados (versión *stable*), con el tema de Waybar `ml4w-transparent-centered`.
+- Paquetes: `waybar`, `swaync`, `nwg-dock-hyprland`, `hyprlock`, `kitty`, `fastfetch`,
+  `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar las piezas).
+- Para el salvapantallas: `hypridle`, `quickshell`, `jq`, `python-numpy`, `python-scipy` (y `ffmpeg` solo para exportar video).
+  El texto en letra doble necesita **kitty ≥ 0.40**.
+- Para el tema de GRUB (opcional): **GRUB 2** en `/boot/grub`, `python-pillow`, `ttf-jetbrains-mono-nerd` y `os-prober` si hay Windows.
+- Para el LED de micrófono: una laptop con LED `platform::micmute` (ThinkPad y similares) y `systemd-logind` (viene por defecto).
+- El bloque animado **solo funciona en kitty**.
+
+## Instalación
+
+```bash
+git clone https://github.com/MichelNahuel/hyprland-dotfiles.git
+cd hyprland-dotfiles
+bash install.sh
+```
+
+Con eso alcanza: el instalador no pide nada más (salvo, al final, si querés el tema de GRUB, que
+por tocar el arranque se pregunta aparte). Revisa que ML4W esté instalado, respalda todo lo que va
+a tocar, copia la configuración y aplica los ajustes que antes había que hacer a mano en archivos
+grandes de ML4W, así que no hace falta editar nada después.
+
+`install.sh`, en orden:
+
+1. Verifica que ML4W esté instalado.
+2. Guarda un respaldo de cada archivo que va a reemplazar o tocar en
+   `~/backups/hyprland-dotfiles-<fecha>/` y anota los archivos nuevos.
+3. Copia los archivos de `config/` a `~/.config/` (respetando los symlinks de ML4W).
+4. Ajusta las rutas de `hyprlock.conf` a tu `$HOME` y genera las piezas animadas.
+5. Aplica, en archivos grandes de ML4W que no están incluidos en el repositorio, los cuatro
+   ajustes que antes eran manuales (sin duplicar nada si ya estaban aplicados):
+   - **Wallpaper al iniciar**: en `hypr/conf/autostart.conf`, encadena la pintura al azar antes
+     de que ML4W aplique la suya, para que no compitan.
+   - **Piezas de la consola**: en `matugen/config.toml`, agrega la plantilla que las regenera
+     con cada pintura.
+   - **Halo en la ventana activa**: en `hypr/conf/window.conf` y `decoration.conf`, selecciona
+     los dos presets nuevos (son opciones más entre las que ya trae ML4W).
+   - **Selector de wallpaper por teclado**: en `hypr/conf/keybindings/default.conf`, `Super+Ctrl+W`
+     pasa a abrir la lista por teclado en vez del selector de Quickshell.
+
+   Si alguno de estos archivos no tiene la línea esperada (por ejemplo, por otra versión de
+   ML4W), el instalador avisa y no toca nada de ese paso en particular; el resto sigue igual.
+6. Recarga Hyprland, Waybar, el dock, swaync, kitty e inicia el script del LED.
+7. Pregunta si querés instalar el [tema de GRUB](#tema-de-grub-opcional). Por defecto, no
+   (`GRUB_TEMA=no bash install.sh` evita la pregunta).
+
+Todo queda aplicado de forma permanente: al encender la computadora, el autostart de ML4W
+lanza Waybar, el dock y swaync con estos temas, y `hypr/conf/custom.conf` inicia el script del LED.
+
+> Para instalar sin recargar nada (por ejemplo, desde una TTY): `NO_RELOAD=1 bash install.sh`
+
+### Imágenes (no incluidas)
+
+Por derechos de autor, el repositorio **no** incluye imágenes:
+
+- **Pantalla de bloqueo**: `hyprlock.conf` espera
+  `~/Pictures/pantalla_bloqueo/kcd_fondo.png` (fondo, 1920×1080) y
+  `~/Pictures/pantalla_bloqueo/vault_boy.png` (foto de perfil). Poné tus imágenes con esos nombres
+  o cambiá las rutas `path =` en `~/.config/hypr/hyprlock.conf`.
+- **Wallpapers**: la estética está pensada para pinturas (por ejemplo *La Libertad guiando al pueblo*,
+  de Delacroix, de dominio público). Poné las tuyas en `~/wallpapers`.
+
+## Volver atrás
+
+Cada instalación genera su propio script de restauración, que devuelve los archivos originales
+(incluidos los cuatro ajustes automáticos del paso 5) y borra los que se agregaron:
+
+```bash
+bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
+```
+
+El tema de GRUB tiene su propio respaldo y script: `sudo bash ~/backups/grub-tema-<fecha>/restaurar.sh`.
+
+## Personalizar
+
+| Qué | Dónde |
+|---|---|
+| Transparencia de la barra | `waybar/themes/ml4w-transparent-centered/default/style-custom.css` → `background: alpha(@surface_container_lowest, 0.12)` |
+| Alto de la barra | mismo archivo → `#workspaces { padding }` y el tamaño de `#custom-ml4w-welcome` |
+| Marca `N.M.` de la barra | `waybar/modules.json` (`custom/ml4w-welcome` → `format`) y el bloque `#custom-ml4w-welcome` del CSS |
+| Formato de la fecha / días con tilde | `waybar/scripts/fecha.sh` → `'%(%w %d/%m %H:%M)T'` y la lista `dias` |
+| Íconos de la barra | `waybar/modules.json` (glifos `md-*` de Nerd Fonts: <https://www.nerdfonts.com/cheat-sheet>) |
+| Transparencia de notificaciones | `swaync/themes/custom/style.css` → `alpha(@surface_container_lowest, 0.05)` |
+| Estilo del dock | `nwg-dock-hyprland/themes/custom/style.css` |
+| Ventana activa: volver al cambio de opacidad de antes | Con la app de ajustes de ML4W (selector de ventana/decoración), o a mano: `hypr/conf/window.conf` → `source = .../windows/no-border.conf` y `hypr/conf/decoration.conf` → `source = .../decorations/rounding-all-blur-no-shadows.conf` |
+| Selector de wallpaper: volver al de Quickshell | `hypr/conf/keybindings/default.conf` → `Super+Ctrl+W` de nuevo a `$SCRIPTS/ml4w-wallpaper-app` |
+| Tamaño de letra de la terminal | `kitty/custom.conf` → `font_size` (al cambiarlo hay que rehacer `ANCHO_CELDA`/`ALTO_CELDA` en `logo-n.py`: son el doble de la celda; medidas: 7→8x19, 8→10x22, 9→11x24, 10→12x27) |
+| Prompt | `ohmyposh/marco.toml` |
+| Datos de la bienvenida | `fastfetch/config.jsonc` |
+| Velocidad y tamaño de las letras | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la letra entera), `COLS`, `FILAS` |
+| Giro y tamaño del punto | `fastfetch/logo-n.py` → `CICLO_PUNTO`, `PUNTO_MS`, `PUNTO_LADO` y `PIE_PUNTO` (margen al pie que alinea el piso del salto) |
+| Posición y separación del bloque | `fastfetch/centrado.sh` → `PUNTO_COLS`, `PUNTO_FILAS`, `HUECO`, `FILA_LETRAS` |
+| Tamaño de la bandera | `fastfetch/logo-n.py` → `BANDERA_COLS`, `BANDERA_FILAS` (y el mismo `BANDERA_COLS` en `centrado.sh`) |
+| Ondulación y sol de la bandera | `fastfetch/logo-n.py` → `BANDERA_AMP` (amplitud), `BANDERA_LARGO` (largo de onda **en celdas**: al ensanchar la bandera aparecen más ondas en vez de estirarse), `BANDERA_MS`, `SOL_ARTE`, `TELA_CELESTE` / `TELA_BLANCA` |
+| Posición de la bandera | `fastfetch/centrado.sh` → `BANDERA_COLS`, `BANDERA_FILAS`, `MARGEN_DER`, `AIRE` |
+| LED encendido al mutear (al revés) | `hypr/scripts/mic-led.sh` → intercambiar `valor=0` / `valor=1` |
+| Colores de la pantalla de bloqueo | `hypr/hyprlock.conf` → `rgba(e6dfcf..)` |
+| Salvapantallas: tiempos | `hypr/hypridle.conf` → `timeout = 480`; `hypr/salvapantallas/carrusel.py` → `SEG_QUIETO`, `MS_PASO`, `PASOS_APARICION`; `hypr/scripts/salvapantallas.sh` → `APAGAR_TRAS` |
+| Salvapantallas: personajes | `hypr/salvapantallas/proceres.json` y `dibujos.json` (imagen en `imagenes/`) |
+
+Después de editar: `Super + Shift + B` recarga Waybar, `swaync-client -rs` recarga las notificaciones,
+`hyprctl reload` recarga Hyprland y `pkill -USR1 -x kitty` recarga la terminal.
+
+## Cómo funciona cada cosa
+
+Esta sección es para quien quiera entender o retocar el detalle interno de cada función. No hace
+falta leerla para instalar.
 
 ### El bloque animado de la consola
 
@@ -261,151 +384,14 @@ Detalles:
 - Vista previa en video, sin instalar nada: `python3 grub/generar_tema.py preview grub.mp4`.
 - Para deshacerlo: `sudo bash ~/backups/grub-tema-<fecha>/restaurar.sh`.
 
-## Requisitos
-
-- Arch Linux (o derivada) con **Hyprland ≥ 0.53** (probado en 0.56.2; usa la sintaxis `layerrule = …, match:namespace …`).
-- **ML4W Dotfiles** instalados (versión *stable*), con el tema de Waybar `ml4w-transparent-centered`.
-- Paquetes: `waybar`, `swaync`, `nwg-dock-hyprland`, `hyprlock`, `kitty`, `fastfetch`,
-  `oh-my-posh`, `libpulse` (`pactl`), `ttf-jetbrains-mono-nerd`, `python-pillow` (para generar las piezas).
-- Para el salvapantallas: `hypridle`, `quickshell`, `jq`, `python-numpy`, `python-scipy` (y `ffmpeg` solo para exportar video).
-  El texto en letra doble necesita **kitty ≥ 0.40**.
-- Para el tema de GRUB (opcional): **GRUB 2** en `/boot/grub`, `python-pillow`, `ttf-jetbrains-mono-nerd` y `os-prober` si hay Windows.
-- Para el LED de micrófono: una laptop con LED `platform::micmute` (ThinkPad y similares) y `systemd-logind` (viene por defecto).
-- El bloque animado **solo funciona en kitty**.
-
-## Instalación
-
-```bash
-git clone https://github.com/MichelNahuel/hyprland-dotfiles.git
-cd hyprland-dotfiles
-bash install.sh
-```
-
-`install.sh`:
-
-1. Verifica que ML4W esté instalado.
-2. Guarda un respaldo de cada archivo que va a reemplazar en `~/backups/hyprland-dotfiles-<fecha>/`
-   y anota los archivos nuevos.
-3. Copia los archivos de `config/` a `~/.config/` (respetando los symlinks de ML4W).
-4. Ajusta las rutas de `hyprlock.conf` a tu `$HOME` y genera las piezas animadas.
-5. Recarga Hyprland, Waybar, el dock, swaync, kitty e inicia el script del LED.
-6. Pregunta si querés instalar el [tema de GRUB](#tema-de-grub-opcional). Por defecto, no
-   (`GRUB_TEMA=no bash install.sh` evita la pregunta).
-
-Todo queda aplicado de forma permanente: al encender la computadora, el autostart de ML4W
-lanza Waybar, el dock y swaync con estos temas, y `hypr/conf/custom.conf` inicia el script del LED.
-
-> Para instalar sin recargar nada (por ejemplo, desde una TTY): `NO_RELOAD=1 bash install.sh`
-
-### Pasos manuales
-
-Estos tocan archivos grandes de ML4W, así que no se incluyen en el repositorio.
-
-**1. Pintura al azar al iniciar.** En `~/.config/hypr/conf/autostart.conf`, reemplazá
-
-```
-exec-once = ~/.config/ml4w/scripts/ml4w-autostart
-```
-
-por
-
-```
-exec-once = bash -c "~/.config/hypr/scripts/wallpaper-inicio.sh; ~/.config/ml4w/scripts/ml4w-autostart"
-```
-
-y quitá cualquier otro `exec-once` que cambie el wallpaper al iniciar. El script solo escribe la
-pintura elegida en la caché de ML4W; al ir encadenado, la caché ya está lista cuando
-`ml4w-autostart` la lee: sin carreras ni `sleep`. Con `Super + Shift + W` se cambia a otra pintura.
-
-**2. Que las piezas se regeneren con cada pintura.** Agregá al final de `~/.config/matugen/config.toml`:
-
-```toml
-[templates.logo_n]
-input_path = '~/.config/matugen/templates/logo-n-colores'
-output_path = '~/.cache/fastfetch/logo-n-colores'
-post_hook = 'python3 ~/.config/fastfetch/logo-n.py'
-```
-
-Sin este paso el bloque funciona igual, pero conserva los colores con los que se generó.
-
-**3. Halo en la ventana activa.** En `~/.config/hypr/conf/window.conf` y
-`~/.config/hypr/conf/decoration.conf`, cambiá el `source` para que apunte a
-`~/.config/hypr/conf/windows/glow.conf` y `~/.config/hypr/conf/decorations/rounding-all-blur-glow.conf`
-respectivamente (son dos opciones más entre las que ya trae ML4W, solo hace falta seleccionarlas).
-El color del halo sale de `$primary`/`$on_primary_container`, así que sigue la paleta de matugen y
-cambia con cada pintura.
-
-**4. Selector de fondo de pantalla por teclado.** En
-`~/.config/hypr/conf/keybindings/default.conf`, reemplazá
-
-```
-bind = $mainMod CTRL, W, exec, $SCRIPTS/ml4w-wallpaper-app                               # Open wallpaper selector
-```
-
-por
-
-```
-bind = $mainMod CTRL, W, exec, ~/.config/hypr/scripts/rofi-wallpaper.sh                  # Open wallpaper selector (teclado: flechas + Enter)
-```
-
-`config/hypr/scripts/rofi-wallpaper.sh` lee la misma carpeta que ML4W (`ml4w/settings/wallpaper-folder`)
-y aplica la elegida con `ml4w-wallpaper`, así que matugen, Waybar y el dock se actualizan igual que con
-el selector original.
-
-### Imágenes (no incluidas)
-
-Por derechos de autor, el repositorio **no** incluye imágenes:
-
-- **Pantalla de bloqueo**: `hyprlock.conf` espera
-  `~/Pictures/pantalla_bloqueo/kcd_fondo.png` (fondo, 1920×1080) y
-  `~/Pictures/pantalla_bloqueo/vault_boy.png` (foto de perfil). Poné tus imágenes con esos nombres
-  o cambiá las rutas `path =` en `~/.config/hypr/hyprlock.conf`.
-- **Wallpapers**: la estética está pensada para pinturas (por ejemplo *La Libertad guiando al pueblo*,
-  de Delacroix, de dominio público). Poné las tuyas en `~/wallpapers`.
-
-## Volver atrás
-
-Cada instalación genera su propio script de restauración, que devuelve los archivos originales
-y borra los que se agregaron:
-
-```bash
-bash ~/backups/hyprland-dotfiles-<fecha>/restaurar.sh
-```
-
-El tema de GRUB tiene su propio respaldo y script: `sudo bash ~/backups/grub-tema-<fecha>/restaurar.sh`.
-
-## Personalizar
-
-| Qué | Dónde |
-|---|---|
-| Transparencia de la barra | `waybar/themes/ml4w-transparent-centered/default/style-custom.css` → `background: alpha(@surface_container_lowest, 0.12)` |
-| Alto de la barra | mismo archivo → `#workspaces { padding }` y el tamaño de `#custom-ml4w-welcome` |
-| Marca `N.M.` de la barra | `waybar/modules.json` (`custom/ml4w-welcome` → `format`) y el bloque `#custom-ml4w-welcome` del CSS |
-| Formato de la fecha / días con tilde | `waybar/scripts/fecha.sh` → `'%(%w %d/%m %H:%M)T'` y la lista `dias` |
-| Íconos de la barra | `waybar/modules.json` (glifos `md-*` de Nerd Fonts: <https://www.nerdfonts.com/cheat-sheet>) |
-| Transparencia de notificaciones | `swaync/themes/custom/style.css` → `alpha(@surface_container_lowest, 0.05)` |
-| Estilo del dock | `nwg-dock-hyprland/themes/custom/style.css` |
-| Tamaño de letra de la terminal | `kitty/custom.conf` → `font_size` (al cambiarlo hay que rehacer `ANCHO_CELDA`/`ALTO_CELDA` en `logo-n.py`: son el doble de la celda; medidas: 7→8x19, 8→10x22, 9→11x24, 10→12x27) |
-| Prompt | `ohmyposh/marco.toml` |
-| Datos de la bienvenida | `fastfetch/config.jsonc` |
-| Velocidad y tamaño de las letras | `fastfetch/logo-n.py` → `MS_PASO` (paso de la ola), `MS_CIERRE` (pausa con la letra entera), `COLS`, `FILAS` |
-| Giro y tamaño del punto | `fastfetch/logo-n.py` → `CICLO_PUNTO`, `PUNTO_MS`, `PUNTO_LADO` y `PIE_PUNTO` (margen al pie que alinea el piso del salto) |
-| Posición y separación del bloque | `fastfetch/centrado.sh` → `PUNTO_COLS`, `PUNTO_FILAS`, `HUECO`, `FILA_LETRAS` |
-| Tamaño de la bandera | `fastfetch/logo-n.py` → `BANDERA_COLS`, `BANDERA_FILAS` (y el mismo `BANDERA_COLS` en `centrado.sh`) |
-| Ondulación y sol de la bandera | `fastfetch/logo-n.py` → `BANDERA_AMP` (amplitud), `BANDERA_LARGO` (largo de onda **en celdas**: al ensanchar la bandera aparecen más ondas en vez de estirarse), `BANDERA_MS`, `SOL_ARTE`, `TELA_CELESTE` / `TELA_BLANCA` |
-| Posición de la bandera | `fastfetch/centrado.sh` → `BANDERA_COLS`, `BANDERA_FILAS`, `MARGEN_DER`, `AIRE` |
-| LED encendido al mutear (al revés) | `hypr/scripts/mic-led.sh` → intercambiar `valor=0` / `valor=1` |
-| Colores de la pantalla de bloqueo | `hypr/hyprlock.conf` → `rgba(e6dfcf..)` |
-| Salvapantallas: tiempos | `hypr/hypridle.conf` → `timeout = 480`; `hypr/salvapantallas/carrusel.py` → `SEG_QUIETO`, `MS_PASO`, `PASOS_APARICION`; `hypr/scripts/salvapantallas.sh` → `APAGAR_TRAS` |
-| Salvapantallas: personajes | `hypr/salvapantallas/proceres.json` y `dibujos.json` (imagen en `imagenes/`) |
-
-Después de editar: `Super + Shift + B` recarga Waybar, `swaync-client -rs` recarga las notificaciones,
-`hyprctl reload` recarga Hyprland y `pkill -USR1 -x kitty` recarga la terminal.
-
 ## Notas
 
 - Si actualizás ML4W Dotfiles, algunos archivos (`waybar/modules.json`, el `config` del tema de Waybar,
   `hyprlock.conf`, `fastfetch/config.jsonc`) pueden volver a los originales: volvé a ejecutar `bash install.sh`.
+- Los cuatro ajustes automáticos del paso 5 de la instalación (wallpaper al iniciar, piezas de la
+  consola, halo de la ventana activa, selector de wallpaper por teclado) son selecciones entre
+  opciones que ya trae ML4W o líneas agregadas a sus archivos: se pueden volver a cambiar en
+  cualquier momento, a mano o con la propia app de ajustes de ML4W (ver [Personalizar](#personalizar)).
 - Si cambiás el estilo de decoración desde la app de ML4W, copiá las líneas de `nwg-dock` de
   `hypr/conf/decorations/rounding-all-blur-no-shadows.conf` al nuevo archivo para mantener el blur del dock.
 - Si cambiás el tema de Waybar con el selector de ML4W, la barra deja de usar esta configuración.

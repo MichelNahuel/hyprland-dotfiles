@@ -77,9 +77,6 @@ if python3 -c "import PIL" 2>/dev/null; then
 else
     aviso "Falta python-pillow: no se pudieron generar las piezas animadas (sudo pacman -S python-pillow)."
 fi
-if ! grep -q 'templates.logo_n' "$CONFIG/matugen/config.toml" 2>/dev/null; then
-    aviso "Para que las piezas se regeneren con cada pintura, agregá [templates.logo_n] a ~/.config/matugen/config.toml (ver README)."
-fi
 
 # 4. Rutas de hyprlock
 sed -i --follow-symlinks "s#__HOME__#$HOME#g" "$CONFIG/hypr/hyprlock.conf"
@@ -87,6 +84,71 @@ for img in kcd_fondo.png vault_boy.png; do
     [ -f "$HOME/Pictures/pantalla_bloqueo/$img" ] ||
         aviso "Falta ~/Pictures/pantalla_bloqueo/$img (usada por la pantalla de bloqueo; ver README)."
 done
+
+# 5. Ajustes que antes había que hacer a mano en archivos grandes de ML4W (no
+#    incluidos en el repositorio). Cada uno se respalda aparte y no hace nada
+#    si ya está aplicado (se puede reinstalar sin duplicar nada) ni si el
+#    archivo no tiene la línea esperada (por ejemplo, por otra versión de ML4W).
+mkdir -p "$BACKUP/manual"
+
+# 5.1 Pintura al azar al iniciar, encadenada antes de que ML4W aplique la suya
+AUTOSTART="$CONFIG/hypr/conf/autostart.conf"
+if [ -f "$AUTOSTART" ] && ! grep -q "wallpaper-inicio.sh" "$AUTOSTART"; then
+    cp -L "$AUTOSTART" "$BACKUP/manual/autostart.conf"
+    sed -i --follow-symlinks -E \
+        's|^exec-once[[:space:]]*=[[:space:]]*~/\.config/ml4w/scripts/ml4w-autostart[[:space:]]*$|exec-once = bash -c "~/.config/hypr/scripts/wallpaper-inicio.sh; ~/.config/ml4w/scripts/ml4w-autostart"|' \
+        "$AUTOSTART"
+    if grep -q "wallpaper-inicio.sh" "$AUTOSTART"; then
+        info "autostart.conf: pintura al azar encadenada antes de ml4w-autostart"
+    else
+        rm -f "$BACKUP/manual/autostart.conf"
+        aviso "autostart.conf no tiene la línea esperada de ml4w-autostart: agregá a mano la pintura al azar (ver README)."
+    fi
+fi
+
+# 5.2 Que las piezas de la consola se regeneren con cada pintura
+MATUGEN="$CONFIG/matugen/config.toml"
+if [ -f "$MATUGEN" ] && ! grep -q 'templates.logo_n' "$MATUGEN"; then
+    cp -L "$MATUGEN" "$BACKUP/manual/config.toml"
+    cat >> "$MATUGEN" <<'TOML'
+
+[templates.logo_n]
+input_path = '~/.config/matugen/templates/logo-n-colores'
+output_path = '~/.cache/fastfetch/logo-n-colores'
+post_hook = 'python3 ~/.config/fastfetch/logo-n.py'
+TOML
+    info "matugen: las piezas de la consola van a regenerarse con cada pintura"
+fi
+
+# 5.3 Halo en la ventana activa (una selección de preset más entre las que ya trae ML4W)
+WINDOW="$CONFIG/hypr/conf/window.conf"
+DECORATION="$CONFIG/hypr/conf/decoration.conf"
+if [ -f "$WINDOW" ] && ! grep -q "windows/glow.conf" "$WINDOW"; then
+    cp -L "$WINDOW" "$BACKUP/manual/window.conf"
+    echo "source = ~/.config/hypr/conf/windows/glow.conf" > "$WINDOW"
+fi
+if [ -f "$DECORATION" ] && ! grep -q "decorations/rounding-all-blur-glow.conf" "$DECORATION"; then
+    cp -L "$DECORATION" "$BACKUP/manual/decoration.conf"
+    echo "source = ~/.config/hypr/conf/decorations/rounding-all-blur-glow.conf" > "$DECORATION"
+fi
+if [ -f "$BACKUP/manual/window.conf" ] || [ -f "$BACKUP/manual/decoration.conf" ]; then
+    info "Halo en la ventana activa activado"
+fi
+
+# 5.4 Selector de fondo de pantalla por teclado en Super+Ctrl+W
+KEYBINDINGS="$CONFIG/hypr/conf/keybindings/default.conf"
+if [ -f "$KEYBINDINGS" ] && ! grep -q "rofi-wallpaper.sh" "$KEYBINDINGS"; then
+    cp -L "$KEYBINDINGS" "$BACKUP/manual/default.conf"
+    sed -i --follow-symlinks -E \
+        's|^(bind = \$mainMod CTRL, W, exec,) \$SCRIPTS/ml4w-wallpaper-app([[:space:]].*)?$|\1 ~/.config/hypr/scripts/rofi-wallpaper.sh                  # Open wallpaper selector (teclado: flechas + Enter)|' \
+        "$KEYBINDINGS"
+    if grep -q "rofi-wallpaper.sh" "$KEYBINDINGS"; then
+        info "Super+Ctrl+W: selector de fondo de pantalla por teclado"
+    else
+        rm -f "$BACKUP/manual/default.conf"
+        aviso "No se encontró el atajo de Super+Ctrl+W en default.conf: cambialo a mano (ver README)."
+    fi
+fi
 
 # Script de restauración para esta instalación
 cat > "$BACKUP/restaurar.sh" <<'EOF'
@@ -108,6 +170,16 @@ done
 while IFS= read -r rel; do
     [ -n "$rel" ] && rm -f "$CONFIG/$rel" && echo "eliminado: $rel"
 done < "$B/nuevos.txt"
+
+# Deshace los ajustes automáticos en archivos grandes de ML4W (solo los que
+# este respaldo realmente tocó: los que no se aplicaron no dejaron copia aquí)
+if [ -d "$B/manual" ]; then
+    [ -f "$B/manual/autostart.conf" ] && cp "$B/manual/autostart.conf" "$CONFIG/hypr/conf/autostart.conf" && echo "restaurado (manual): autostart.conf"
+    [ -f "$B/manual/config.toml" ] && cp "$B/manual/config.toml" "$CONFIG/matugen/config.toml" && echo "restaurado (manual): matugen/config.toml"
+    [ -f "$B/manual/window.conf" ] && cp "$B/manual/window.conf" "$CONFIG/hypr/conf/window.conf" && echo "restaurado (manual): window.conf"
+    [ -f "$B/manual/decoration.conf" ] && cp "$B/manual/decoration.conf" "$CONFIG/hypr/conf/decoration.conf" && echo "restaurado (manual): decoration.conf"
+    [ -f "$B/manual/default.conf" ] && cp "$B/manual/default.conf" "$CONFIG/hypr/conf/keybindings/default.conf" && echo "restaurado (manual): keybindings/default.conf"
+fi
 
 # Archivos generados fuera de la configuración
 rm -f "$HOME/.cache/fastfetch/logo-n.png" "$HOME/.cache/fastfetch/logo-m.png" \
