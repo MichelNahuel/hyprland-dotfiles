@@ -20,6 +20,7 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Dock** (nwg-dock-hyprland) | Tema `custom`: translúcido, esquinas rectas, borde fino, flotante, con blur. |
 | **Notificaciones** (swaync) | Tema `custom`: translúcidas (5%), esquinas rectas, blur que muestra lo que hay detrás (sin xray). |
 | **Cursor** | No salta al centro de la ventana al enfocarla (`cursor:no_warps`). |
+| **Ventana activa** (opcional) | En vez del sutil cambio de opacidad de siempre, un halo de color alrededor de la ventana con foco (borde en degradé + sombra del mismo color); la que no tiene foco queda sin borde. |
 | **Touchpad** | Deslizar tres dedos a los costados cambia de escritorio, de a uno y sin saltear los vacíos. |
 | **Pantalla de bloqueo** (hyprlock) | Mismo lenguaje que la consola: hora con dígitos de caracteres (`hypr/scripts/reloj-bloqueo.py`), fecha en español, usuario como el prompt, marco y campo rectos de línea fina en crema; el marco se pone dorado con Bloq Mayús. |
 | **Terminal** (kitty) | Tipografía chica (7), más aire alrededor del texto (18) y cursor en barra fina. |
@@ -325,6 +326,13 @@ post_hook = 'python3 ~/.config/fastfetch/logo-n.py'
 ```
 
 Sin este paso el bloque funciona igual, pero conserva los colores con los que se generó.
+
+**3. Halo en la ventana activa.** En `~/.config/hypr/conf/window.conf` y
+`~/.config/hypr/conf/decoration.conf`, cambiá el `source` para que apunte a
+`~/.config/hypr/conf/windows/glow.conf` y `~/.config/hypr/conf/decorations/rounding-all-blur-glow.conf`
+respectivamente (son dos opciones más entre las que ya trae ML4W, solo hace falta seleccionarlas).
+El color del halo sale de `$primary`/`$on_primary_container`, así que sigue la paleta de matugen y
+cambia con cada pintura.
 
 ### Imágenes (no incluidas)
 
