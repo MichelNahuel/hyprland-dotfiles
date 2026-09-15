@@ -21,7 +21,8 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 | **Notificaciones** (swaync) | Tema `custom`: translúcidas (5%), esquinas rectas, blur que muestra lo que hay detrás (sin xray). |
 | **Cursor** | No salta al centro de la ventana al enfocarla (`cursor:no_warps`). |
 | **Ventana activa** (opcional) | En vez del sutil cambio de opacidad de siempre, un halo de color alrededor de la ventana con foco (borde en degradé + sombra del mismo color); la que no tiene foco queda sin borde. |
-| **Touchpad** | Deslizar tres dedos a los costados cambia de escritorio, de a uno y sin saltear los vacíos. |
+| **Touchpad** | Tres dedos a los costados cambia de escritorio (de a uno, sin saltear los vacíos); tres dedos hacia abajo alterna pantalla completa de la ventana activa; tres dedos hacia arriba abre el mismo selector de ventanas/escritorios que `Super+Tab`. |
+| **Selector de fondo de pantalla** (`Super+Ctrl+W`) | Lista por teclado (flechas + Enter) en vez del selector de Quickshell, que exige mouse. |
 | **Pantalla de bloqueo** (hyprlock) | Mismo lenguaje que la consola: hora con dígitos de caracteres (`hypr/scripts/reloj-bloqueo.py`), fecha en español, usuario como el prompt, marco y campo rectos de línea fina en crema; el marco se pone dorado con Bloq Mayús. |
 | **Terminal** (kitty) | Tipografía chica (7), más aire alrededor del texto (18) y cursor en barra fina. |
 | **Prompt** (oh-my-posh) | Dos líneas con marco fino: `┌─ ruta ── rama` y `└─›`, con la flecha en rojo si el comando falló. |
@@ -296,7 +297,7 @@ lanza Waybar, el dock y swaync con estos temas, y `hypr/conf/custom.conf` inicia
 
 > Para instalar sin recargar nada (por ejemplo, desde una TTY): `NO_RELOAD=1 bash install.sh`
 
-### Dos pasos manuales
+### Pasos manuales
 
 Estos tocan archivos grandes de ML4W, así que no se incluyen en el repositorio.
 
@@ -333,6 +334,23 @@ Sin este paso el bloque funciona igual, pero conserva los colores con los que se
 respectivamente (son dos opciones más entre las que ya trae ML4W, solo hace falta seleccionarlas).
 El color del halo sale de `$primary`/`$on_primary_container`, así que sigue la paleta de matugen y
 cambia con cada pintura.
+
+**4. Selector de fondo de pantalla por teclado.** En
+`~/.config/hypr/conf/keybindings/default.conf`, reemplazá
+
+```
+bind = $mainMod CTRL, W, exec, $SCRIPTS/ml4w-wallpaper-app                               # Open wallpaper selector
+```
+
+por
+
+```
+bind = $mainMod CTRL, W, exec, ~/.config/hypr/scripts/rofi-wallpaper.sh                  # Open wallpaper selector (teclado: flechas + Enter)
+```
+
+`config/hypr/scripts/rofi-wallpaper.sh` lee la misma carpeta que ML4W (`ml4w/settings/wallpaper-folder`)
+y aplica la elegida con `ml4w-wallpaper`, así que matugen, Waybar y el dock se actualizan igual que con
+el selector original.
 
 ### Imágenes (no incluidas)
 

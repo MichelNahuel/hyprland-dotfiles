@@ -59,7 +59,8 @@ done < <(find . -type f -print0 | sort -z)
 chmod +x "$CONFIG/waybar/scripts/fecha.sh" "$CONFIG/hypr/scripts/mic-led.sh" \
          "$CONFIG/fastfetch/centrado.sh" "$CONFIG/hypr/scripts/salvapantallas.sh" \
          "$CONFIG/hypr/scripts/parpadeo.sh" \
-         "$CONFIG/hypr/scripts/screenshot.sh" "$CONFIG/hypr/scripts/reloj-bloqueo.py"
+         "$CONFIG/hypr/scripts/screenshot.sh" "$CONFIG/hypr/scripts/reloj-bloqueo.py" \
+         "$CONFIG/hypr/scripts/wallpaper-inicio.sh" "$CONFIG/hypr/scripts/rofi-wallpaper.sh"
 
 # Salvapantallas: el carrusel necesita numpy, scipy y pillow; el script, jq
 if ! python3 -c "import numpy, scipy, PIL" 2>/dev/null; then
