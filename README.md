@@ -8,6 +8,10 @@ la interfaz se vuelve translúcida, plana y de líneas finas para que el cuadro 
 
 ![La N animada de la consola](capturas/consola.png)
 
+![Halo en la ventana activa](capturas/halo.png)
+
+![Selector de fondo de pantalla por teclado](capturas/selector-wallpaper.png)
+
 ## Índice
 
 - [Qué incluye](#qué-incluye)
